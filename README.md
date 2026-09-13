@@ -2,6 +2,8 @@
 
 把《明日方舟：终末地》同人主题的纸墨工业视觉语言移植到 ChatGPT 客户端，加入动态等高线、工业交互、水印、启动动画和任务状态大字。
 
+> 🚧 持续更新中：ChatGPT 客户端会自动更新，直接补丁模式依赖内部文件；每次客户端更新后请先运行 doctor，再决定是否重新应用补丁。
+
 > 非官方同人项目。本项目与 OpenAI、Hypergryph、GRYPHLINE 没有隶属、赞助或授权关系，也不包含官方游戏素材。
 
 ## 功能
@@ -38,6 +40,24 @@ npm run enhanced:launch
 
 背景装饰仅挂载到主内容区域，宠物、语音及透明辅助窗口不参与美化。客户端更新后如果无法识别主内容区域，增强层不会给整个窗口铺设背景。
 
+## 第二种方法：直接 preload 补丁（实验性）
+
+如果希望普通 ChatGPT 快捷方式直接加载美化层，可以选择直接修改当前 MSIX 的 `app\\resources\\app.asar`。补丁只在已验证的 ChatGPT `26.903.9818.0` 上启用，向 `.vite/build/preload.js` 追加本项目运行时；不会修改账号数据、Cookie、localStorage 或 `~/.codex/config.toml`。
+
+```powershell
+# 只读检查（不会修改文件）
+npm run direct:doctor
+npm run direct:status
+
+# 预览并显式确认后才写入 app.asar；必须先完全退出 ChatGPT
+npm run direct:apply -- --apply
+
+# 用校验过的原始备份恢复
+npm run direct:restore
+```
+
+补丁前会把原始 ASAR 保存到 `%LOCALAPPDATA%\\codex-theme-endfield\\direct-backups\\<版本>\\app.asar.original`，并记录 SHA-256。客户端更新、路径变化、哈希不匹配或安装目录不可写时，工具会拒绝操作；不会强行接管正在运行的 ChatGPT。MSIX 的签名/权限可能导致直接写入失败，这时继续使用上面的增强启动器即可。直接补丁不需要常驻 PowerShell，但属于非官方兼容层，升级后通常需要重新适配。
+
 ## 卸载与恢复
 
 ```powershell
@@ -63,13 +83,13 @@ npm audit --omit=dev
 
 ## 安全与兼容性
 
-增强模式是非官方兼容层，通过 loopback-only Electron CDP 注入 CSS/JS，不修改 `app.asar`、MSIX 安装目录或全局配置，也不需要管理员权限。ChatGPT 更新后内部 DOM、事件或调试能力可能变化；此时可以卸载增强层，原始客户端仍保持完整。
+增强启动器模式是非官方兼容层，通过 loopback-only Electron CDP 注入 CSS/JS，不修改 `app.asar`、MSIX 安装目录或全局配置，也不需要管理员权限。直接补丁模式则会在显式确认后改写 `app.asar`，始终保留并校验可恢复的原始备份。两种模式都不读取对话正文或鉴权数据。ChatGPT 更新后内部 DOM、事件、preload 或 ASAR 结构可能变化；项目会持续更新版本探针和补丁适配，遇到未知版本时默认拒绝直接修改。
 
 技术实现仍保留现有仓库、命令和 `OpenAI.Codex` 标识，以兼容 Windows 安装器与旧脚本；用户界面统一使用 ChatGPT 名称。
 
 ## English summary
 
-An unofficial Windows-only interactive enhancement layer for the ChatGPT desktop client, inspired by the Endfield paper-and-industrial visual language. It adds animated contours, industrial control feedback, watermark, loader, task status plates, and a Shadow DOM settings panel through a loopback-only Electron CDP launcher. It does not patch `app.asar` or ChatGPT configuration. Repository and Windows package identifiers retain their technical `Codex` names for compatibility.
+An unofficial Windows-only interactive enhancement layer for the ChatGPT desktop client, inspired by the Endfield paper-and-industrial visual language. The default launcher injects the runtime through loopback-only Electron CDP; an experimental second mode can append the same runtime to the verified ASAR preload with an explicit `--apply`, a SHA-256 backup, and a restore command. The project is continuously maintained as the client changes. Neither mode reads conversation content or authentication data. Repository and Windows package identifiers retain their technical `Codex` names for compatibility.
 
 ## 许可与署名
 

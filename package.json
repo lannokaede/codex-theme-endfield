@@ -2,12 +2,13 @@
   "name": "codex-theme-endfield",
   "version": "1.1.0",
   "private": true,
-  "description": "Endfield-inspired interactive enhancement layer for the ChatGPT desktop client.",
+  "description": "Endfield-inspired interactive enhancement layer for the ChatGPT desktop client, with an experimental direct preload patch mode.",
   "type": "module",
   "engines": {
     "node": ">=20"
   },
   "dependencies": {
+    "@electron/asar": "3.2.18",
     "ws": "8.21.3"
   },
   "scripts": {
@@ -17,6 +18,10 @@
     "enhanced:doctor": "node scripts/enhanced-doctor.mjs",
     "enhanced:install": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/enhanced-install.ps1",
     "enhanced:launch": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/enhanced-launch.ps1",
-    "enhanced:uninstall": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/enhanced-uninstall.ps1"
+    "enhanced:uninstall": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/enhanced-uninstall.ps1",
+    "direct:doctor": "node scripts/direct-patch.mjs doctor",
+    "direct:status": "node scripts/direct-patch.mjs status",
+    "direct:apply": "node scripts/direct-patch.mjs apply",
+    "direct:restore": "node scripts/direct-patch.mjs restore"
   }
 }

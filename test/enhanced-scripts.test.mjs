@@ -34,3 +34,13 @@ test('PowerShell entry points keep install ownership checks and repo delegation'
   assert.match(doctor, /scripts.*enhanced-host\.mjs/s);
   assert.match(doctor, /install is incomplete/);
 });
+
+test('direct patch entry point is explicit, version-gated and restorable', async () => {
+  const direct = await fs.readFile(new URL('../scripts/direct-patch.mjs', import.meta.url), 'utf8');
+  const module = await fs.readFile(new URL('../src/direct-patch.mjs', import.meta.url), 'utf8');
+  assert.match(direct, /--apply/);
+  assert.match(module, /app\.asar/);
+  assert.match(module, /26\.903\.9818\.0/);
+  assert.match(module, /backup/i);
+  assert.match(module, /refus/i);
+});
