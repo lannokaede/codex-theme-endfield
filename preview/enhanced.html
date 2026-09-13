@@ -1,39 +1,14 @@
 <!doctype html>
-<html lang="zh-CN">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Interactive Endfield enhancement preview for the ChatGPT desktop client" />
-    <title>ChatGPT · Endfield interactive enhancement</title>
-    <link rel="stylesheet" href="./enhanced.css" />
-  </head>
-  <body>
-    <main id="root">
-      <header><span class="eyebrow">CHATGPT / ENDFIELD</span><span class="chip">INTERACTIVE PREVIEW</span></header>
-      <section class="hero">
-        <p class="eyebrow">PAPER / SIGNAL / INDUSTRY</p>
-        <h1>可读的工业图纸<br /><span>也可以有动态反馈</span></h1>
-        <p>这是增强层的静态 fixture：等高线、水印、控件反馈、设置面板和任务完成大字均由同一套运行时渲染。</p>
-        <div class="actions"><button type="button" id="simulate">模拟任务完成</button><button type="button" id="toggle-dark">切换明暗</button></div>
-      </section>
-      <section class="panel" aria-label="runtime preview panel">
-        <div class="panel-title">ACTIVE THREAD <span>STATUS / READY</span></div>
-        <div class="rows"><div>01 <b>client</b> <span>ChatGPT desktop</span></div><div>02 <b>surface</b> <span>industrial paper</span></div><div>03 <b>signal</b> <span>interactive / accessible</span></div></div>
-      </section>
-    </main>
-    <script>
-      globalThis.__codexEndfieldInitialConfig = { schemaVersion: 1, enabled: true, palette: 'valley-yellow', corner: 'square', interactions: true, contour: { enabled: true, animated: true, fps: 24, speed: 1, pauseOnScroll: true }, watermark: { enabled: true, persistent: true }, loader: { mode: 'off' }, taskPlate: { start: false, complete: true, animation: true, durationMs: 3000 } };
-    </script>
-    <script src="../dist/enhanced-runtime.js"></script>
-    <script>
-      document.querySelector('#simulate').addEventListener('click', () => {
-        const id = String(Date.now());
-        window.postMessage({ method: 'turn/started', params: { threadId: 'preview', turn: { id, status: 'inProgress' } } }, '*');
-        setTimeout(() => window.postMessage({ method: 'turn/completed', params: { threadId: 'preview', turn: { id, status: 'completed' } } }, '*'), 250);
-      });
-      document.querySelector('#toggle-dark').addEventListener('click', () => {
-        document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-      });
-    </script>
-  </body>
-</html>
+<html lang="zh-CN" data-theme="light">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ChatGPT Endfield — client preview</title><link rel="stylesheet" href="enhanced.css"></head>
+<body><div id="root">
+<aside><header><strong>ChatGPT</strong><span>⌘</span></header><nav aria-label="导航"><button>＋ 新对话</button><button>⌕ 搜索</button><button>◷ 定时任务</button><button>⊞ 插件</button></nav><p class="label">项目 / PROJECTS</p><nav aria-label="项目"><button aria-current="page">▱ endfield-workspace</button><button>▱ design-system</button></nav><p class="label">最近</p><div class="recent">整理组件设计规范<br>检查主题兼容性<br>实现交互与动效</div><footer><span>◉ 本地工作区</span><button id="settings">外观设置</button></footer></aside>
+<main><div class="toolbar"><span>endfield-workspace <small>/ main</small></span><div><button id="toggle-dark">明暗</button><button id="simulate">模拟任务完成</button></div></div>
+<section class="conversation"><div class="user-message">帮我整理这套界面的视觉规范，让内容保持清晰。</div><article><p class="label">CHATGPT</p><h1>让内容成为界面的中心。</h1><p>使用纸灰底色和墨色文字建立阅读层次。信号黄用于选中状态与主要操作，工程图形只留在边缘和留白里。</p><h2>本次调整</h2><ul><li>侧栏与会话内容保持清晰分区</li><li>输入框使用直角、细线和稳定的焦点反馈</li><li>背景徽记不覆盖正文，不进入辅助窗口</li></ul><pre><code>surface  = paper<br>text     = ink<br>accent   = signal<br>geometry = precise</code></pre><p class="done">✓ 视觉规范已整理</p></article></section>
+<div class="composer"><form onsubmit="event.preventDefault()"><textarea aria-label="消息" placeholder="继续描述你想完成的工作…"></textarea><div class="composer-tools"><span>＋ &nbsp; 本地 · main</span><button type="submit" aria-label="发送">↑</button></div></form><small>ChatGPT 客户端美化预览 · Ctrl+Shift+E 外观设置</small></div></main></div>
+<script>globalThis.__codexEndfieldInitialConfig={loader:{mode:'off'}};</script><script src="../dist/enhanced-runtime.js"></script>
+<script>
+document.querySelector('#toggle-dark').onclick=()=>{document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';};
+document.querySelector('#settings').onclick=()=>document.dispatchEvent(new KeyboardEvent('keydown',{key:'e',ctrlKey:true,shiftKey:true}));
+document.querySelector('#simulate').onclick=()=>{const id=String(Date.now());window.postMessage({method:'turn/started',params:{threadId:'preview',turn:{id,status:'inProgress'}}},'*');setTimeout(()=>window.postMessage({method:'turn/completed',params:{threadId:'preview',turn:{id,status:'completed'}}},'*'),100);};
+</script></body></html>

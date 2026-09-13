@@ -1,6 +1,9 @@
 (() => {
   'use strict';
 
+  // Auxiliary Electron windows (pet, voice, overlays) must retain transparency.
+  if (window.top !== window || /(?:pet|companion|overlay|voice|mini)[-_/]?/i.test(location.pathname + location.search)) return;
+
   if (globalThis.__codexEndfieldRuntime) {
     globalThis.__codexEndfieldRuntime.refresh?.(globalThis.__codexEndfieldInitialConfig);
     return;
@@ -44,6 +47,7 @@
     contourFrame: 0,
     contourTimer: 0,
     scrolling: false,
+    surface: null,
   };
 
   delete globalThis.__codexEndfieldInitialConfig;
@@ -119,6 +123,7 @@
     document.documentElement.dataset.codexEndfield = state.config.enabled ? state.config.palette : 'off';
     document.documentElement.dataset.codexEndfieldMode = state.dark ? 'dark' : 'light';
     document.documentElement.dataset.codexEndfieldInteractions = state.config.interactions ? 'on' : 'off';
+    document.documentElement.dataset.codexEndfieldCorner = state.config.corner;
     if (!state.config.enabled) {
       clearProperties();
       return;
@@ -126,7 +131,7 @@
     const colors = palette();
     setProperty('--codex-base-accent', colors.accent);
     setProperty('--color-background-primary', colors.background);
-    setProperty('--color-background-surface', colors.background);
+    setProperty('--color-background-surface', state.dark ? '#181a18' : '#f2f2ec');
     setProperty('--color-background-surface-under', colors.background);
     setProperty('--color-background-secondary-soft', state.dark ? '#171a17' : '#f0f0eb');
     setProperty('--color-background-accent', colors.accent);
@@ -151,12 +156,25 @@
     state.style = document.createElement('style');
     state.style.id = 'codex-endfield-style';
     state.style.textContent = `
-      html[data-codex-endfield] body { background: var(--color-background-primary) !important; color: var(--color-text-foreground) !important; }
-      html[data-codex-endfield] #root { position: relative; z-index: 1; background: transparent !important; }
-      html[data-codex-endfield] #codex-endfield-canvas, html[data-codex-endfield] #codex-endfield-watermark { position: fixed; inset: 0; pointer-events: none; }
-      html[data-codex-endfield] #codex-endfield-canvas { z-index: 0; opacity: .26; }
-      html[data-codex-endfield] #codex-endfield-watermark { z-index: 0; display: grid; place-items: center; overflow: hidden; }
-      html[data-codex-endfield] #codex-endfield-watermark span { color: var(--codex-base-accent); font: 700 clamp(5rem, 18vw, 17rem)/.8 Arial, sans-serif; letter-spacing: .08em; opacity: ${state.dark ? '.085' : '.13'}; transform: rotate(-12deg); user-select: none; white-space: nowrap; }
+      html[data-codex-endfield]:not([data-codex-endfield="off"]) body { background: var(--color-background-primary) !important; color: var(--color-text-foreground) !important; }
+      html[data-codex-endfield] [data-endfield-surface] { position: relative; isolation: isolate; }
+      html[data-codex-endfield] #codex-endfield-canvas, html[data-codex-endfield] #codex-endfield-watermark { position: absolute; inset: 0; pointer-events: none; z-index: -1; max-width: 100%; max-height: 100%; overflow: clip; }
+      html[data-codex-endfield] #codex-endfield-canvas { opacity: .32; mask-image: linear-gradient(100deg,#000,transparent 55%,#000); }
+      html[data-codex-endfield] #codex-endfield-watermark { color: var(--color-text-foreground); user-select: none; }
+      #codex-endfield-watermark svg { position: absolute; right: 5%; top: 6%; width: min(28%,240px); height: auto; opacity: .075; }
+      #codex-endfield-watermark .ef-register { position: absolute; left: 28px; bottom: 24px; display: flex; align-items: center; gap: 12px; opacity: .28; font: 9px/1.5 monospace; letter-spacing: .15em; }
+      #codex-endfield-watermark .ef-register::before { content: ''; width: 36px; height: 12px; background: repeating-linear-gradient(90deg,currentColor 0 2px,transparent 2px 4px,currentColor 4px 5px,transparent 5px 8px); }
+      #codex-endfield-watermark .ef-corner { position: absolute; inset: 24px; border: 1px solid currentColor; opacity: .08; clip-path: polygon(0 0,20px 0,20px 1px,1px 1px,1px 20px,0 20px,0 0,100% 100%,calc(100% - 20px) 100%,calc(100% - 20px) calc(100% - 1px),calc(100% - 1px) calc(100% - 1px),calc(100% - 1px) calc(100% - 20px),100% calc(100% - 20px),100% 100%); }
+      html[data-codex-endfield-corner="square"] :is(button,textarea,input:not([type=checkbox]):not([type=radio]),[role=menu],[role=dialog],pre,form) { border-radius: 0 !important; }
+      html[data-codex-endfield] :is(textarea,[contenteditable=true]) { caret-color: var(--color-text-foreground); }
+      html[data-codex-endfield] form:has(textarea), html[data-codex-endfield] form:has([contenteditable=true]) { background: var(--color-background-surface) !important; border: 1px solid var(--color-border) !important; border-top: 2px solid var(--color-text-foreground) !important; box-shadow: none !important; }
+      html[data-codex-endfield] [class*="_ComposerLayoutRoot_"]:has([contenteditable=true][role=textbox]) { background: var(--color-background-surface) !important; border: 1px solid var(--color-border) !important; border-top: 2px solid var(--color-text-foreground) !important; box-shadow: none !important; }
+      html[data-codex-endfield-corner="square"] [class*="_ComposerLayoutRoot_"]:has([contenteditable=true][role=textbox]) { border-radius: 0 !important; }
+      html[data-codex-endfield] aside { background: var(--color-background-primary); border-right: 1px solid var(--color-border-subtle); }
+      html[data-codex-endfield] [aria-current=page], html[data-codex-endfield] [aria-selected=true] { box-shadow: inset 3px 0 var(--codex-base-accent); background: var(--color-background-secondary-soft); }
+      html[data-codex-endfield] button[type=submit] { background: var(--codex-base-accent) !important; color: #101110 !important; }
+      html[data-codex-endfield] pre { border: 1px solid var(--color-border-subtle); background: var(--color-background-surface); }
+      @media (max-width: 640px) { #codex-endfield-watermark svg { width: 32%; top: 8%; } #codex-endfield-watermark .ef-register { font-size: 8px; left: 16px; bottom: 12px; } }
       html[data-codex-endfield="off"] #codex-endfield-canvas, html[data-codex-endfield="off"] #codex-endfield-watermark { display: none; }
       html[data-codex-endfield-interactions="on"] button:not(:disabled), html[data-codex-endfield-interactions="on"] [role="button"]:not([aria-disabled="true"]), html[data-codex-endfield-interactions="on"] [role="menuitem"], html[data-codex-endfield-interactions="on"] [role="option"] { transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease !important; }
       html[data-codex-endfield-interactions="on"] button:not(:disabled):hover, html[data-codex-endfield-interactions="on"] [role="button"]:not([aria-disabled="true"]):hover, html[data-codex-endfield-interactions="on"] [role="menuitem"]:hover, html[data-codex-endfield-interactions="on"] [role="option"]:hover { border-color: var(--codex-base-accent) !important; box-shadow: inset 3px 0 0 var(--codex-base-accent) !important; transform: translateX(2px); }
@@ -182,10 +200,19 @@
       state.watermark = document.createElement('div');
       state.watermark.id = 'codex-endfield-watermark';
       state.watermark.setAttribute('aria-hidden', 'true');
-      state.watermark.innerHTML = '<span>ENDFIELD</span>';
+      state.watermark.innerHTML = `<svg viewBox="0 0 320 360" fill="none" aria-hidden="true">
+        <path d="M160 20 290 95v150l-130 75L30 245V95Z" stroke="currentColor"/>
+        <path d="m160 50 104 60v120l-104 60-104-60V110Z" stroke="currentColor" stroke-dasharray="3 7"/>
+        <path d="M160 0v42m0 256v42M10 170h42m216 0h42M160 82v176M76 170h168" stroke="currentColor"/>
+        <path d="m94 209 66-114 66 114h-35l-31-54-31 54Zm35 14h62l-31 36Z" fill="currentColor"/>
+        <path d="M48 282h48m128 0h48M48 278v8m224-8v8" stroke="currentColor"/>
+        <text x="160" y="345" text-anchor="middle" fill="currentColor" font-family="Arial,sans-serif" font-size="13" letter-spacing="6">ENDFIELD</text>
+        <text x="160" y="359" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="6" letter-spacing="2">TALOS-II / FIELD SYSTEMS</text>
+      </svg><div class="ef-corner"></div><div class="ef-register">EF / 02 &nbsp; — &nbsp; FRONTIER SYSTEMS</div>`;
       document.body.prepend(state.watermark);
     }
-    state.watermark.style.display = state.config.watermark.enabled && (state.config.watermark.persistent || !currentThreadId()) ? 'grid' : 'none';
+    state.surface.prepend(state.watermark, state.canvas);
+    state.watermark.style.display = state.config.enabled && state.config.watermark.enabled && (state.config.watermark.persistent || !currentThreadId()) ? 'block' : 'none';
   }
 
   function currentThreadId() {
@@ -341,7 +368,7 @@
       <style>
         :host { all: initial; --ef-accent: #fff500; --ef-background: #101110; --ef-foreground: #f5f5f0; font-family: Arial, sans-serif; color: var(--ef-foreground); }
         button, select, input { font: inherit; }
-        #tab { position: fixed; right: 0; top: 48%; z-index: 2147482990; border: 1px solid var(--ef-accent); border-right: 0; background: var(--ef-foreground); color: var(--ef-background); padding: 8px 6px; letter-spacing: .12em; cursor: pointer; writing-mode: vertical-rl; }
+        #tab { display: none; }
         #panel { position: fixed; right: 20px; top: 20px; z-index: 2147482991; width: min(340px, calc(100vw - 40px)); background: var(--ef-background); border: 1px solid #5c6459; box-shadow: 8px 8px 0 #000; padding: 18px; display: none; }
         #panel.open { display: block; }
         h2 { font-size: 16px; letter-spacing: .12em; margin: 0 0 14px; color: var(--ef-accent); }
@@ -370,15 +397,26 @@
     document.body.append(state.panel);
     const tab = shadow.querySelector('#tab');
     const panel = shadow.querySelector('#panel');
+    let previousFocus;
     const toggle = () => {
       const open = !panel.classList.contains('open');
+      if (open) previousFocus = document.activeElement;
       panel.classList.toggle('open', open);
       tab.setAttribute('aria-expanded', String(open));
-      if (open) shadow.querySelector('[data-field="palette"]').focus(); else tab.focus();
+      if (open) shadow.querySelector('[data-field="palette"]').focus(); else previousFocus?.focus();
     };
     tab.addEventListener('click', toggle);
     shadow.querySelector('#close').addEventListener('click', toggle);
-    shadow.addEventListener('keydown', (event) => { if (event.key === 'Escape' && panel.classList.contains('open')) toggle(); });
+    shadow.addEventListener('keydown', (event) => {
+      if (!panel.classList.contains('open')) return;
+      if (event.key === 'Escape') { event.preventDefault(); toggle(); }
+      if (event.key === 'Tab') {
+        const items = [...panel.querySelectorAll('select,input,button')];
+        const first = items[0], last = items.at(-1);
+        if (event.shiftKey && shadow.activeElement === first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && shadow.activeElement === last) { event.preventDefault(); first.focus(); }
+      }
+    });
     shadow.querySelector('[data-field="palette"]').addEventListener('change', (event) => setConfig({ palette: event.target.value }));
     shadow.querySelector('[data-field="corner"]').addEventListener('change', (event) => setConfig({ corner: event.target.value }));
     shadow.querySelector('[data-field="contour"]').addEventListener('change', (event) => setConfig({ contour: { enabled: event.target.checked } }));
@@ -407,15 +445,15 @@
     const canvas = state.canvas;
     if (!canvas || !state.config.contour.enabled || !state.config.enabled) return;
     const dpr = Math.min(devicePixelRatio || 1, 2);
-    const width = Math.max(1, innerWidth);
-    const height = Math.max(1, innerHeight);
+    const width = Math.max(1, state.surface.clientWidth);
+    const height = Math.max(1, state.surface.clientHeight);
     if (canvas.width !== Math.floor(width * dpr) || canvas.height !== Math.floor(height * dpr)) {
       canvas.width = Math.floor(width * dpr); canvas.height = Math.floor(height * dpr); canvas.style.width = `${width}px`; canvas.style.height = `${height}px`;
     }
     const context = canvas.getContext('2d');
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
     context.clearRect(0, 0, width, height);
-    context.strokeStyle = palette().accent;
+    context.strokeStyle = palette().foreground;
     context.lineWidth = 1;
     const phase = (time / 1000) * state.config.contour.speed;
     const step = 52;
@@ -520,11 +558,16 @@
   }
 
   function refresh(nextConfig) {
+    const surface = document.querySelector('main, [role="main"]');
+    if (!surface) return;
+    state.surface = surface;
+    surface.setAttribute('data-endfield-surface', '');
     state.config = normalize(nextConfig ?? state.config);
     ensureStyle();
     applyTokens();
     ensureBackground();
     ensurePanel();
+    updatePanel();
     restartContour();
     bindRuntime();
   }
@@ -549,5 +592,9 @@
     showLoader();
   }
   const start = () => refresh(state.config);
+  const mountObserver = new MutationObserver(() => {
+    if (!state.surface?.isConnected) start();
+  });
+  mountObserver.observe(document, { childList: true, subtree: true });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true }); else start();
 })();

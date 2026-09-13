@@ -8,7 +8,7 @@
 
 - Marching Squares 等高线 Canvas：24 FPS、低速、滚动/隐藏页面暂停；
 - 方角/圆角、hover/active/focus、选择色、光标、滚动条和菜单反馈；
-- `ENDFIELD` 背景水印；
+- 会话区域内的工程图形水印：几何徽记、定位十字、刻度与小号 ENDFIELD 标识；
 - 首次启动工业加载板，可切换为关闭或每次启动；
 - 任务状态大字：`任务完成`、`任务失败`、`任务中止`；
 - Shadow DOM 设置面板，可切换 Valley Yellow/Wuling Cyan、动效和任务提示；
@@ -34,7 +34,9 @@ npm run enhanced:launch
 
 启动器每次自动解析最新的 `OpenAI.Codex` MSIX 路径。已运行的 ChatGPT 不会被自动结束；从桌面快捷方式启动时会弹窗说明如何完全退出，不再出现 PowerShell 窗口一闪而过却没有反馈的情况。运行期间会有一个只绑定 `127.0.0.1` 的本地调试端口，增强宿主不会把对话正文、Cookie、localStorage 或鉴权数据写入日志或配置。
 
-设置通过 ChatGPT 右侧的 `EF` 标签或 `Ctrl+Shift+E` 打开，配置保存在 `%LOCALAPPDATA%\codex-theme-endfield\config.json`。
+设置通过 `Ctrl+Shift+E` 打开；取消右侧常驻 EF 标签。配置保存在 `%LOCALAPPDATA%\codex-theme-endfield\config.json`。
+
+背景装饰仅挂载到主内容区域，宠物、语音及透明辅助窗口不参与美化。客户端更新后如果无法识别主内容区域，增强层不会给整个窗口铺设背景。
 
 ## 卸载与恢复
 

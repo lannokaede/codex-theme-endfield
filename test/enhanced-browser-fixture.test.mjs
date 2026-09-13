@@ -73,7 +73,7 @@ test('runtime renders its interactive surfaces and responds to turn completion e
     await new Promise((resolve) => setTimeout(resolve, 600));
     const surfaces = await session.send('Runtime.evaluate', { expression: `({
       canvas: Boolean(document.querySelector('#codex-endfield-canvas')),
-      watermark: document.querySelector('#codex-endfield-watermark span')?.textContent,
+      watermark: document.querySelector('#codex-endfield-watermark svg text')?.textContent,
       panel: Boolean(document.querySelector('#codex-endfield-settings')?.shadowRoot?.querySelector('#tab')),
       loader: Boolean(document.querySelector('#codex-endfield-loader')),
       accent: getComputedStyle(document.documentElement).getPropertyValue('--codex-base-accent').trim(),
@@ -82,6 +82,17 @@ test('runtime renders its interactive surfaces and responds to turn completion e
 
     const plate = await session.send('Runtime.evaluate', { expression: 'document.querySelector("#codex-endfield-task-plate")?.textContent ?? null', returnByValue: true });
     assert.equal(plate.result.value, '任务完成');
+
+    const bounds = await session.send('Runtime.evaluate', { expression: `({
+      contained: document.querySelector('main').contains(document.querySelector('#codex-endfield-watermark')),
+      tabHidden: getComputedStyle(document.querySelector('#codex-endfield-settings').shadowRoot.querySelector('#tab')).display === 'none',
+      overflow: document.documentElement.scrollWidth > innerWidth
+    })`, returnByValue: true });
+    assert.deepEqual(bounds.result.value, { contained: true, tabHidden: true, overflow: false });
+    await session.send('Page.navigate', { url: `http://127.0.0.1:${pagePort}/pet-overlay` });
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    const auxiliary = await session.send('Runtime.evaluate', { expression: 'Boolean(document.querySelector("#codex-endfield-style, #codex-endfield-settings"))', returnByValue: true });
+    assert.equal(auxiliary.result.value, false, 'auxiliary window must not receive theme surfaces');
   } finally {
     session?.close();
     if (chrome.exitCode == null) chrome.kill();
