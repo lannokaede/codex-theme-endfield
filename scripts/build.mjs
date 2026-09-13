@@ -5,6 +5,7 @@ import { serializeTheme, validateThemeDefinition } from '../src/theme-format.mjs
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const sourcePath = path.join(root, 'themes', 'source.json');
+const runtimePath = path.join(root, 'runtime', 'enhanced-runtime.js');
 const checkOnly = process.argv.includes('--check');
 
 const source = JSON.parse(await readFile(sourcePath, 'utf8'));
@@ -115,6 +116,7 @@ files.set(path.join('dist', 'themes.json'), `${JSON.stringify({
   })),
 }, null, 2)}\n`);
 files.set(path.join('preview', 'themes.js'), createBrowserThemeScript());
+files.set(path.join('dist', 'enhanced-runtime.js'), await readFile(runtimePath, 'utf8'));
 
 if (checkOnly) {
   const drift = [];

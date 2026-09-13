@@ -34,8 +34,8 @@ if (!installDir) throw new Error('Missing --install-dir');
 await ensureOwnedInstallDirectory(installDir);
 const configPath = `${installDir}\\config.json`;
 const runtimePath = `${installDir}\\enhanced-runtime.js`;
-const runtimeSource = await fs.readFile(runtimePath, 'utf8');
-await readEnhancedConfig(configPath);
+const config = await readEnhancedConfig(configPath);
+const runtimeSource = `globalThis.__codexEndfieldInitialConfig=${JSON.stringify(config)};\n${await fs.readFile(runtimePath, 'utf8')}`;
 
 const sessions = new Map();
 let lastError = '';
