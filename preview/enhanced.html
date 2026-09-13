@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Interactive Endfield enhancement preview for Codex" />
+    <title>Codex · Endfield interactive enhancement</title>
+    <link rel="stylesheet" href="./enhanced.css" />
+  </head>
+  <body>
+    <main id="root">
+      <header><span class="eyebrow">CODEX / ENDFIELD</span><span class="chip">INTERACTIVE PREVIEW</span></header>
+      <section class="hero">
+        <p class="eyebrow">PAPER / SIGNAL / INDUSTRY</p>
+        <h1>可读的工业图纸<br /><span>也可以有动态反馈</span></h1>
+        <p>这是增强层的静态 fixture：等高线、水印、控件反馈、设置面板和任务完成大字均由同一套运行时渲染。</p>
+        <div class="actions"><button type="button" id="simulate">模拟任务完成</button><button type="button" id="toggle-dark">切换明暗</button></div>
+      </section>
+      <section class="panel" aria-label="runtime preview panel">
+        <div class="panel-title">ACTIVE THREAD <span>STATUS / READY</span></div>
+        <div class="rows"><div>01 <b>theme</b> <span>codex-theme-v1</span></div><div>02 <b>surface</b> <span>industrial paper</span></div><div>03 <b>signal</b> <span>interactive / accessible</span></div></div>
+      </section>
+    </main>
+    <script>
+      globalThis.__codexEndfieldInitialConfig = { schemaVersion: 1, enabled: true, palette: 'valley-yellow', corner: 'square', interactions: true, contour: { enabled: true, animated: true, fps: 24, speed: 1, pauseOnScroll: true }, watermark: { enabled: true, persistent: true }, loader: { mode: 'off' }, taskPlate: { start: false, complete: true, animation: true, durationMs: 3000 } };
+    </script>
+    <script src="../dist/enhanced-runtime.js"></script>
+    <script>
+      document.querySelector('#simulate').addEventListener('click', () => {
+        const id = String(Date.now());
+        window.postMessage({ method: 'turn/started', params: { threadId: 'preview', turn: { id, status: 'inProgress' } } }, '*');
+        setTimeout(() => window.postMessage({ method: 'turn/completed', params: { threadId: 'preview', turn: { id, status: 'completed' } } }, '*'), 250);
+      });
+      document.querySelector('#toggle-dark').addEventListener('click', () => {
+        document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      });
+    </script>
+  </body>
+</html>

@@ -3,7 +3,15 @@ $ErrorActionPreference = 'Stop'
 $installRoot = [IO.Path]::GetFullPath($PSScriptRoot)
 $ownerPath = Join-Path $installRoot '.owner'
 if (-not (Test-Path -LiteralPath $ownerPath) -or (Get-Content -Raw -LiteralPath $ownerPath).Trim() -ne 'codex-theme-endfield') {
-  throw "Refusing to launch from an unowned Endfield directory: $installRoot"
+  $localBase = if ([string]::IsNullOrWhiteSpace($env:LOCALAPPDATA)) { $env:TEMP } else { $env:LOCALAPPDATA }
+  $installedRoot = [IO.Path]::GetFullPath((Join-Path $localBase 'codex-theme-endfield'))
+  $installedLaunch = Join-Path $installedRoot 'enhanced-launch.ps1'
+  $installedOwner = Join-Path $installedRoot '.owner'
+  if ((Test-Path -LiteralPath $installedLaunch) -and (Test-Path -LiteralPath $installedOwner) -and (Get-Content -Raw -LiteralPath $installedOwner).Trim() -eq 'codex-theme-endfield') {
+    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $installedLaunch
+    exit $LASTEXITCODE
+  }
+  throw "Enhanced mode is not installed. Run npm run enhanced:install first."
 }
 
 $existing = @(Get-Process -Name ChatGPT -ErrorAction SilentlyContinue)

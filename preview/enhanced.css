@@ -1,0 +1,27 @@
+:root { color-scheme: light; font-family: Arial, sans-serif; }
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; min-height: 100vh; background: #e8e8e2; color: #101110; }
+#root { min-height: 100vh; padding: 28px clamp(20px, 7vw, 110px); }
+header { display: flex; justify-content: space-between; border-bottom: 1px solid color-mix(in srgb, currentColor 24%, transparent); padding-bottom: 16px; font-size: 12px; font-weight: 700; letter-spacing: .15em; }
+.eyebrow { margin: 0; font-size: 11px; font-weight: 700; letter-spacing: .16em; }
+.chip { color: #6b5d00; }
+.hero { max-width: 780px; padding: clamp(72px, 13vh, 150px) 0 70px; }
+h1 { margin: 20px 0; font-size: clamp(42px, 8vw, 104px); line-height: .94; letter-spacing: -.055em; }
+h1 span { color: #6b5d00; }
+.hero p:not(.eyebrow) { max-width: 56ch; color: color-mix(in srgb, currentColor 72%, transparent); font-size: 18px; line-height: 1.6; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 28px; }
+button { border: 1px solid currentColor; padding: 11px 15px; background: transparent; color: inherit; cursor: pointer; font: 700 13px Arial, sans-serif; }
+button:first-child { background: #fff500; color: #101110; }
+button:focus-visible { outline: 2px solid #101110; outline-offset: 3px; }
+.panel { width: min(780px, 100%); border: 1px solid color-mix(in srgb, currentColor 26%, transparent); background: color-mix(in srgb, #f4f4ef 88%, transparent); padding: 22px; }
+.panel-title { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid color-mix(in srgb, currentColor 20%, transparent); padding-bottom: 14px; font: 700 12px monospace; letter-spacing: .12em; }
+.panel-title span { color: #1f7431; }
+.rows { display: grid; gap: 12px; padding-top: 20px; font: 14px/1.5 monospace; }
+.rows div { display: grid; grid-template-columns: 30px 100px 1fr; gap: 12px; }
+.rows div > :first-child { opacity: .42; }.rows b { color: #6b5d00; }.rows span { opacity: .75; }
+html[data-theme="dark"] { color-scheme: dark; }
+html[data-theme="dark"] body { background: #101110; color: #f5f5f0; }
+html[data-theme="dark"] .chip, html[data-theme="dark"] h1 span, html[data-theme="dark"] .rows b { color: #fff500; }
+html[data-theme="dark"] .panel { background: color-mix(in srgb, #181a18 88%, transparent); }
+html[data-theme="dark"] .panel-title span { color: #4fbf5c; }
+@media (max-width: 640px) { header { align-items: flex-start; flex-direction: column; gap: 10px; } .rows div { grid-template-columns: 22px 80px 1fr; gap: 8px; font-size: 12px; } }

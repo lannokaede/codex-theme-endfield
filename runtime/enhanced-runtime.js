@@ -39,6 +39,8 @@
     detector: new Map(),
     activePlate: null,
     plateDismiss: null,
+    bound: false,
+    loaderShown: false,
     contourFrame: 0,
     contourTimer: 0,
     scrolling: false,
@@ -183,7 +185,7 @@
       state.watermark.innerHTML = '<span>ENDFIELD</span>';
       document.body.prepend(state.watermark);
     }
-    state.watermark.style.display = state.config.watermark.enabled ? 'grid' : 'none';
+    state.watermark.style.display = state.config.watermark.enabled && (state.config.watermark.persistent || !currentThreadId()) ? 'grid' : 'none';
   }
 
   function currentThreadId() {
@@ -271,6 +273,7 @@
     shadow.querySelector('[data-field="watermark"]').checked = state.config.watermark.enabled;
     shadow.querySelector('[data-field="loader"]').value = state.config.loader.mode;
     shadow.querySelector('[data-field="taskPlate"]').checked = state.config.taskPlate.complete;
+    shadow.querySelector('[data-field="taskStart"]').checked = state.config.taskPlate.start;
     shadow.querySelector('[data-field="animation"]').checked = state.config.taskPlate.animation;
   }
 
@@ -314,6 +317,7 @@
         <label>持续水印<input data-field="watermark" type="checkbox"></label>
         <label>启动动画<select data-field="loader"><option value="off">关闭</option><option value="first-launch">首次启动</option><option value="always">每次启动</option></select></label>
         <label>任务状态大字<input data-field="taskPlate" type="checkbox"></label>
+        <label>任务开始大字<input data-field="taskStart" type="checkbox"></label>
         <label>大字冲击动画<input data-field="animation" type="checkbox"></label>
         <button id="close" type="button">关闭设置</button>
       </section>`;
@@ -330,6 +334,7 @@
     shadow.querySelector('[data-field="watermark"]').addEventListener('change', (event) => setConfig({ watermark: { enabled: event.target.checked } }));
     shadow.querySelector('[data-field="loader"]').addEventListener('change', (event) => setConfig({ loader: { mode: event.target.value } }));
     shadow.querySelector('[data-field="taskPlate"]').addEventListener('change', (event) => setConfig({ taskPlate: { complete: event.target.checked } }));
+    shadow.querySelector('[data-field="taskStart"]').addEventListener('change', (event) => setConfig({ taskPlate: { start: event.target.checked } }));
     shadow.querySelector('[data-field="animation"]').addEventListener('change', (event) => setConfig({ taskPlate: { animation: event.target.checked } }));
     updatePanel();
     document.addEventListener('keydown', (event) => { if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'e') { event.preventDefault(); toggle(); } });
@@ -359,12 +364,37 @@
     context.lineWidth = 1;
     const phase = (time / 1000) * state.config.contour.speed;
     const step = 52;
-    for (let band = 0; band < 7; band += 1) {
-      context.globalAlpha = .18 - band * .017;
+    const columns = Math.ceil(width / step) + 1;
+    const rows = Math.ceil(height / step) + 1;
+    const field = (x, y) => Math.sin(x / 118 + phase * .32) + Math.cos(y / 92 - phase * .21) + Math.sin((x + y) / 175 + phase * .12) * .55;
+    const point = (x, y) => ({ x: x * step, y: y * step });
+    const interpolate = (a, b, level) => {
+      const denominator = b.value - a.value;
+      const ratio = denominator === 0 ? .5 : Math.max(0, Math.min(1, (level - a.value) / denominator));
+      return { x: a.x + (b.x - a.x) * ratio, y: a.y + (b.y - a.y) * ratio };
+    };
+    const cases = [[], [[3, 0]], [[0, 1]], [[3, 1]], [[1, 2]], [[3, 2], [0, 1]], [[0, 2]], [[3, 2]], [[2, 3]], [[0, 2]], [[0, 1], [2, 3]], [[1, 2]], [[1, 3]], [[0, 1]], [[3, 0]], []];
+    const levels = [-.75, -.25, .25, .75];
+    for (let levelIndex = 0; levelIndex < levels.length; levelIndex += 1) {
+      const level = levels[levelIndex];
+      context.globalAlpha = .19 - levelIndex * .025;
       context.beginPath();
-      for (let x = -step; x <= width + step; x += step) {
-        const y = height * .46 + Math.sin(x / 115 + phase * .35 + band * .62) * (38 + band * 12) + band * 30;
-        if (x === -step) context.moveTo(x, y); else context.lineTo(x, y);
+      for (let y = 0; y < rows - 1; y += 1) {
+        for (let x = 0; x < columns - 1; x += 1) {
+          const topLeft = { ...point(x, y), value: field(x * step, y * step) };
+          const topRight = { ...point(x + 1, y), value: field((x + 1) * step, y * step) };
+          const bottomRight = { ...point(x + 1, y + 1), value: field((x + 1) * step, (y + 1) * step) };
+          const bottomLeft = { ...point(x, y + 1), value: field(x * step, (y + 1) * step) };
+          const mask = (topLeft.value > level ? 1 : 0) | (topRight.value > level ? 2 : 0) | (bottomRight.value > level ? 4 : 0) | (bottomLeft.value > level ? 8 : 0);
+          const edges = [
+            interpolate(topLeft, topRight, level), interpolate(topRight, bottomRight, level),
+            interpolate(bottomRight, bottomLeft, level), interpolate(bottomLeft, topLeft, level),
+          ];
+          for (const [from, to] of cases[mask]) {
+            context.moveTo(edges[from].x, edges[from].y);
+            context.lineTo(edges[to].x, edges[to].y);
+          }
+        }
       }
       context.stroke();
     }
@@ -381,6 +411,59 @@
     state.contourTimer = requestAnimationFrame(contourFrame);
   }
 
+  function showLoader() {
+    if (state.loaderShown || !document.body || state.config.loader.mode === 'off') return;
+    if (state.config.loader.mode === 'first-launch') {
+      try {
+        if (sessionStorage.getItem('codex-endfield-loader-seen') === '1') return;
+        sessionStorage.setItem('codex-endfield-loader-seen', '1');
+      } catch { /* Some embedded contexts disable session storage. */ }
+    }
+    state.loaderShown = true;
+    const loader = document.createElement('div');
+    loader.id = 'codex-endfield-loader';
+    loader.innerHTML = '<div data-brand>ENDFIELD // CODEX</div><div data-status>INITIALIZING SURFACE</div><div data-rail><i></i></div><strong data-percent>00</strong>';
+    Object.assign(loader.style, {
+      position: 'fixed', inset: '0', zIndex: '2147482999', background: '#070907', color: '#f5f5f0',
+      display: 'grid', gridTemplateRows: 'auto auto 4px auto', alignContent: 'center', gap: '14px', padding: '12vw',
+      fontFamily: 'Arial, sans-serif', letterSpacing: '.14em', transition: 'opacity 620ms ease, clip-path 520ms ease',
+    });
+    const brand = loader.querySelector('[data-brand]');
+    const status = loader.querySelector('[data-status]');
+    const rail = loader.querySelector('[data-rail]');
+    const fill = document.createElement('i');
+    Object.assign(rail.style, { display: 'block', height: '4px', background: '#2f352f', overflow: 'hidden' });
+    Object.assign(fill.style, { display: 'block', height: '100%', width: '0%', background: palette().accent, transformOrigin: 'left center' });
+    rail.append(fill);
+    Object.assign(brand.style, { color: palette().accent, fontSize: 'clamp(18px, 3vw, 32px)', fontWeight: '800' });
+    Object.assign(status.style, { color: '#aeb5aa', fontSize: '11px' });
+    const percent = loader.querySelector('[data-percent]');
+    Object.assign(percent.style, { fontSize: 'clamp(48px, 12vw, 144px)', fontWeight: '900', lineHeight: '.8', letterSpacing: '-.06em' });
+    document.body.append(loader);
+    const reduced = isReducedMotion();
+    if (reduced) {
+      percent.textContent = '100';
+      fill.style.width = '100%';
+      setTimeout(() => loader.remove(), 120);
+      return;
+    }
+    const started = performance.now();
+    const tick = (now) => {
+      const progress = Math.min(1, (now - started) / 1750);
+      const value = Math.round(progress * 100);
+      percent.textContent = String(value).padStart(2, '0');
+      fill.style.width = `${value}%`;
+      status.textContent = progress < .62 ? 'INITIALIZING SURFACE' : progress < .9 ? 'CALIBRATING SIGNAL' : 'LINK READY';
+      if (progress < 1) requestAnimationFrame(tick);
+      else {
+        loader.style.clipPath = 'inset(0 0 0 100%)';
+        loader.style.opacity = '0';
+        setTimeout(() => loader.remove(), 620);
+      }
+    };
+    requestAnimationFrame(tick);
+  }
+
   function refresh(nextConfig) {
     state.config = normalize(nextConfig ?? state.config);
     ensureStyle();
@@ -388,17 +471,21 @@
     ensureBackground();
     ensurePanel();
     restartContour();
+    bindRuntime();
   }
 
   globalThis.__codexEndfieldRuntime = { refresh };
-  const start = () => {
-    refresh(state.config);
+  function bindRuntime() {
+    if (state.bound || !document.body) return;
+    state.bound = true;
     window.addEventListener('message', (event) => handleNotification(event.data));
     const observer = new MutationObserver(() => { const dark = detectDark(); if (dark !== state.dark) { applyTokens(); drawContour(0); } });
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'data-color-mode'] });
     window.addEventListener('resize', () => drawContour(0), { passive: true });
     window.addEventListener('scroll', () => { state.scrolling = true; clearTimeout(state.scrollTimer); state.scrollTimer = setTimeout(() => { state.scrolling = false; }, 180); }, { passive: true, capture: true });
     globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').addEventListener?.('change', restartContour);
-  };
+    showLoader();
+  }
+  const start = () => refresh(state.config);
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true }); else start();
 })();

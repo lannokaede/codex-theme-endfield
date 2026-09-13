@@ -2,6 +2,14 @@ $ErrorActionPreference = 'Stop'
 
 $localBase = if ([string]::IsNullOrWhiteSpace($env:LOCALAPPDATA)) { $env:TEMP } else { $env:LOCALAPPDATA }
 $installRoot = [IO.Path]::GetFullPath((Join-Path $localBase 'codex-theme-endfield'))
+$repoOwner = Join-Path $PSScriptRoot '.owner'
+if (-not (Test-Path -LiteralPath $repoOwner)) {
+  $installedUninstall = Join-Path $installRoot 'enhanced-uninstall.ps1'
+  if (Test-Path -LiteralPath $installedUninstall) {
+    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $installedUninstall
+    exit $LASTEXITCODE
+  }
+}
 $marker = Join-Path $installRoot '.owner'
 if (-not (Test-Path -LiteralPath $marker) -or (Get-Content -Raw -LiteralPath $marker).Trim() -ne 'codex-theme-endfield') {
   throw "Refusing to remove an unowned directory: $installRoot"
