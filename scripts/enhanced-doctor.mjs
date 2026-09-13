@@ -50,8 +50,23 @@ server.close();
 console.log(`✓ Loopback port allocation works (sample ${port})`);
 
 const installDir = path.join(process.env.LOCALAPPDATA ?? '', 'codex-theme-endfield');
-if (installDir && fs.existsSync(installDir)) console.log(`✓ Enhanced install directory exists: ${installDir}`);
-else warnings.push(`Enhanced install directory is not installed yet: ${installDir}`);
+if (installDir && fs.existsSync(installDir)) {
+  const requiredInstallFiles = [
+    '.owner',
+    'enhanced-launch.ps1',
+    'enhanced-runtime.js',
+    path.join('scripts', 'enhanced-host.mjs'),
+    path.join('src', 'enhanced-cdp.mjs'),
+  ];
+  const missingInstallFiles = requiredInstallFiles.filter((relative) => !fs.existsSync(path.join(installDir, relative)));
+  if (missingInstallFiles.length) {
+    failures.push(`Enhanced install is incomplete; run npm run enhanced:install again (missing: ${missingInstallFiles.join(', ')})`);
+  } else {
+    console.log(`✓ Enhanced install is complete: ${installDir}`);
+  }
+} else {
+  warnings.push(`Enhanced install directory is not installed yet: ${installDir}`);
+}
 
 for (const warning of warnings) console.warn(`! ${warning}`);
 if (failures.length) {

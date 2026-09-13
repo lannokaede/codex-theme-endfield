@@ -72,7 +72,7 @@ $codex = Start-Process -FilePath $codexExe -ArgumentList @(
 ) -PassThru
 
 try {
-  & node (Join-Path $installRoot 'enhanced-host.mjs') "--port=$port" "--pid=$($codex.Id)" "--install-dir=$installRoot"
+  & node (Join-Path $installRoot 'scripts\enhanced-host.mjs') "--port=$port" "--pid=$($codex.Id)" "--install-dir=$installRoot"
   if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 } finally {
   if (-not $codex.HasExited) {

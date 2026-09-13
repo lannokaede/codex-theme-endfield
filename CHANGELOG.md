@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Fixed desktop shortcut failures appearing as a momentary PowerShell flash: shortcut launches are now hidden and show a persistent explanation when ChatGPT must be fully closed first.
+- Fixed the installed enhancement host layout so its runtime modules resolve correctly, and made `enhanced:doctor` reject incomplete installations.
 
 ## 1.1.0
 

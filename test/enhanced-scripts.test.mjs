@@ -25,8 +25,12 @@ test('PowerShell entry points keep install ownership checks and repo delegation'
   assert.match(launch, /MessageBox/);
   assert.match(install, /-WindowStyle Hidden/);
   assert.match(install, /-Shortcut/);
+  assert.match(install, /\$relative -eq 'scripts\\enhanced-host\.mjs'/);
+  assert.match(launch, /scripts\\enhanced-host\.mjs/);
   assert.match(uninstall, /Codex Endfield\.lnk/);
   assert.match(uninstall, /ChatGPT Endfield\.lnk/);
   assert.match(uninstall, /GetFolderPath\('Desktop'\)/);
   assert.match(doctor, /ChatGPT/);
+  assert.match(doctor, /scripts.*enhanced-host\.mjs/s);
+  assert.match(doctor, /install is incomplete/);
 });

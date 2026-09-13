@@ -34,6 +34,18 @@ test('storage writes atomically and normalizes untrusted values', async () => {
   assert.equal((await fs.readdir(installDir)).some((file) => file.includes('.tmp-')), false);
 });
 
+test('storage accepts UTF-8 BOM configs created by Windows PowerShell', async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'endfield-storage-'));
+  const installDir = path.join(root, 'codex-theme-endfield');
+  await ensureOwnedInstallDirectory(installDir);
+  const configPath = path.join(installDir, 'config.json');
+  await fs.writeFile(configPath, `\uFEFF${JSON.stringify({ palette: 'wuling-cyan' })}`, 'utf8');
+
+  const config = await readEnhancedConfig(configPath);
+
+  assert.equal(config.palette, 'wuling-cyan');
+});
+
 test('storage refuses to overwrite an unowned directory', async () => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'endfield-storage-'));
   const installDir = path.join(root, 'unowned');

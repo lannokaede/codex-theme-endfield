@@ -44,7 +44,7 @@ export async function readEnhancedConfig(configPath) {
     throw new Error('Enhanced theme config is too large');
   }
   try {
-    return normalizeEnhancedConfig(JSON.parse(raw));
+    return normalizeEnhancedConfig(JSON.parse(raw.replace(/^\uFEFF/, '')));
   } catch (error) {
     throw new Error(`Enhanced theme config is invalid: ${error.message}`);
   }

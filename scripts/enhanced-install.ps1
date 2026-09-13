@@ -4,6 +4,7 @@ $repoRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $localBase = if ([string]::IsNullOrWhiteSpace($env:LOCALAPPDATA)) { $env:TEMP } else { $env:LOCALAPPDATA }
 $installRoot = [IO.Path]::GetFullPath((Join-Path $localBase 'codex-theme-endfield'))
 $marker = Join-Path $installRoot '.owner'
+$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 
 if (Test-Path -LiteralPath $installRoot) {
   $existingItem = Get-Item -LiteralPath $installRoot -Force
@@ -15,7 +16,6 @@ if (Test-Path -LiteralPath $installRoot) {
   }
 } else {
   New-Item -ItemType Directory -Path $installRoot -Force | Out-Null
-  $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
   [IO.File]::WriteAllText($marker, "codex-theme-endfield`n", $utf8NoBom)
 }
 
@@ -36,15 +36,17 @@ foreach ($relative in $required) {
   if (-not (Test-Path -LiteralPath $source)) { throw "Build artifact is missing: $source" }
   $destination = Join-Path $installRoot ([IO.Path]::GetFileName($relative))
   if ($relative -like 'src\*') { $destination = Join-Path (Join-Path $installRoot 'src') ([IO.Path]::GetFileName($relative)) }
-  if ($relative -like 'scripts\*') { $destination = Join-Path $installRoot ([IO.Path]::GetFileName($relative)) }
-  if ($relative -like 'dist\*') { $destination = Join-Path $installRoot ([IO.Path]::GetFileName($relative)) }
+  if ($relative -eq 'scripts\enhanced-host.mjs') { $destination = Join-Path $installRoot $relative }
   $parent = Split-Path -Parent $destination
   New-Item -ItemType Directory -Path $parent -Force | Out-Null
   Copy-Item -LiteralPath $source -Destination $destination -Force
 }
 
+$legacyHostPath = Join-Path $installRoot 'enhanced-host.mjs'
+if (Test-Path -LiteralPath $legacyHostPath) { Remove-Item -LiteralPath $legacyHostPath -Force }
+
 if (-not (Test-Path -LiteralPath (Join-Path $installRoot 'config.json'))) {
-  @'
+  $defaultConfig = @'
 {
   "schemaVersion": 1,
   "enabled": true,
@@ -56,7 +58,8 @@ if (-not (Test-Path -LiteralPath (Join-Path $installRoot 'config.json'))) {
   "loader": { "mode": "first-launch" },
   "taskPlate": { "start": false, "complete": true, "animation": true, "durationMs": 3000 }
 }
-'@ | Set-Content -LiteralPath (Join-Path $installRoot 'config.json') -Encoding utf8
+'@
+  [IO.File]::WriteAllText((Join-Path $installRoot 'config.json'), "$defaultConfig`n", $utf8NoBom)
 }
 
 & npm install --prefix $installRoot --omit=dev --ignore-scripts
