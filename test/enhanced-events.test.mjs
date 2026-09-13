@@ -50,3 +50,12 @@ test('edge detector establishes a silent baseline and deduplicates terminal even
   assert.equal(detector.observe({ method: 'turn/started', threadId: 'thread-1', turnId: 'turn-2', status: 'inProgress' }), 'started');
   assert.equal(detector.observe({ method: 'turn/completed', threadId: 'thread-1', turnId: 'turn-2', status: 'failed' }), 'failed');
 });
+
+test('edge detector bounds remembered turn state', () => {
+  const detector = createTurnEdgeDetector();
+  detector.observe({ method: 'turn/started', threadId: 'thread-1', turnId: 'baseline', status: 'inProgress' });
+  for (let index = 0; index < 80; index += 1) {
+    detector.observe({ method: 'turn/started', threadId: 'thread-1', turnId: `turn-${index}`, status: 'inProgress' });
+  }
+  assert.equal(detector.observe({ method: 'turn/completed', threadId: 'thread-1', turnId: 'turn-0', status: 'completed' }), 'completed');
+});

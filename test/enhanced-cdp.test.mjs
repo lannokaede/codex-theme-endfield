@@ -15,5 +15,6 @@ test('Codex target filter rejects external browser targets', () => {
   assert.equal(isCodexTarget({ ...base, url: 'app://codex/webview/index.html' }), true);
   assert.equal(isCodexTarget({ ...base, url: 'file:///C:/Codex/index.html' }), true);
   assert.equal(isCodexTarget({ ...base, url: 'https://example.com' }), false);
-  assert.equal(isCodexTarget({ ...base, url: 'http://127.0.0.1:8080/index.html' }), true);
+  assert.equal(isCodexTarget({ ...base, title: 'Codex fixture', url: 'http://127.0.0.1:8080/index.html' }), true);
+  assert.equal(isCodexTarget({ ...base, url: 'http://127.0.0.1:8080/index.html' }), false);
 });

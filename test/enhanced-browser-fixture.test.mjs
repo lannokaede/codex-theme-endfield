@@ -42,7 +42,7 @@ test('runtime renders its interactive surfaces and responds to turn completion e
     response.end(`<!doctype html><html><head><title>Codex fixture</title></head><body><main id="root"><button>Run</button></main><script>
       setTimeout(() => {
         window.postMessage({ method: 'turn/started', params: { threadId: 'fixture', turn: { id: 'one', status: 'inProgress' } } }, '*');
-        window.postMessage({ method: 'turn/completed', params: { threadId: 'fixture', turn: { id: 'one', status: 'completed' } } }, '*');
+        window.dispatchEvent(new CustomEvent('codex:notification', { detail: { method: 'turn/completed', params: { threadId: 'fixture', turn: { id: 'one', status: 'completed' } } } }));
         window.postMessage({ method: 'turn/started', params: { threadId: 'fixture', turn: { id: 'two', status: 'inProgress' } } }, '*');
         window.postMessage({ method: 'turn/completed', params: { threadId: 'fixture', turn: { id: 'two', status: 'completed' } } }, '*');
       }, 250);

@@ -16,6 +16,7 @@ test('CDP session attaches only to the advertised loopback target and injects be
     response.end(JSON.stringify([{
       id: 'fixture-page',
       type: 'page',
+      title: 'Codex fixture',
       url: 'app://codex/webview/index.html',
       webSocketDebuggerUrl: `ws://127.0.0.1:${server.address()?.port ?? 0}/devtools/page/fixture-page`,
     }]));

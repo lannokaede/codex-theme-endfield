@@ -6,6 +6,10 @@ $installRoot = [IO.Path]::GetFullPath((Join-Path $localBase 'codex-theme-endfiel
 $marker = Join-Path $installRoot '.owner'
 
 if (Test-Path -LiteralPath $installRoot) {
+  $existingItem = Get-Item -LiteralPath $installRoot -Force
+  if (($existingItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+    throw "Refusing to use a reparse-point install directory: $installRoot"
+  }
   if (-not (Test-Path -LiteralPath $marker) -or (Get-Content -Raw -LiteralPath $marker).Trim() -ne 'codex-theme-endfield') {
     throw "Refusing to overwrite an unowned directory: $installRoot"
   }

@@ -10,8 +10,11 @@ test('PowerShell entry points keep install ownership checks and repo delegation'
   assert.match(launch, /127\.0\.0\.1/);
   assert.match(launch, /remote-debugging-port/);
   assert.match(launch, /Enhanced mode is not installed/);
+  assert.match(launch, /ReparsePoint/);
   assert.match(install, /codex-theme-endfield/);
   assert.match(install, /WriteAllText|NoNewline/);
+  assert.match(install, /ReparsePoint/);
   assert.match(uninstall, /owner marker|unowned directory/i);
+  assert.match(uninstall, /ReparsePoint/);
   assert.match(uninstall, /Recurse/);
 });

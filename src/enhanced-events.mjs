@@ -1,5 +1,6 @@
 const SUPPORTED_METHODS = new Set(['turn/started', 'turn/completed']);
 const MAX_ID_LENGTH = 200;
+const MAX_TRACKED_TURNS = 64;
 
 function safeId(value) {
   return typeof value === 'string' && value.length > 0 && value.length <= MAX_ID_LENGTH ? value : null;
@@ -40,6 +41,10 @@ export function decodeCodexNotification(value) {
 export function createTurnEdgeDetector() {
   const turns = new Map();
   let hasBaseline = false;
+  const remember = (turnId, value) => {
+    turns.set(turnId, value);
+    while (turns.size > MAX_TRACKED_TURNS) turns.delete(turns.keys().next().value);
+  };
 
   return {
     observe(event) {
@@ -47,7 +52,7 @@ export function createTurnEdgeDetector() {
       const previous = turns.get(event.turnId);
       if (event.method === 'turn/started') {
         if (previous?.started) return null;
-        turns.set(event.turnId, { started: true, terminal: previous?.terminal ?? false });
+        remember(event.turnId, { started: true, terminal: previous?.terminal ?? false });
         if (!hasBaseline) {
           hasBaseline = true;
           return null;
@@ -56,7 +61,7 @@ export function createTurnEdgeDetector() {
       }
 
       if (previous?.terminal) return null;
-      turns.set(event.turnId, { started: previous?.started ?? false, terminal: true });
+      remember(event.turnId, { started: previous?.started ?? false, terminal: true });
       if (!hasBaseline) {
         hasBaseline = true;
         return null;

@@ -214,6 +214,11 @@
     return { method: notification.method, threadId, turnId, status };
   }
 
+  function rememberTurn(turnId, value) {
+    state.detector.set(turnId, value);
+    while (state.detector.size > 64) state.detector.delete(state.detector.keys().next().value);
+  }
+
   function showPlate(text) {
     state.activePlate?.remove();
     state.plateDismiss?.();
@@ -245,7 +250,7 @@
     const previous = state.detector.get(event.turnId);
     if (event.method === 'turn/started') {
       if (previous?.started) return;
-      state.detector.set(event.turnId, { started: true, terminal: false });
+      rememberTurn(event.turnId, { started: true, terminal: false });
       if (previous || state.detector.size > 1) {
         if (state.config.taskPlate.start) showPlate('任务开始');
       }
@@ -253,11 +258,49 @@
     }
     if (previous?.terminal) return;
     const firstReadableEvent = state.detector.size === 0;
-    state.detector.set(event.turnId, { started: previous?.started ?? false, terminal: true });
+    rememberTurn(event.turnId, { started: previous?.started ?? false, terminal: true });
     if (firstReadableEvent) return;
     if (state.config.taskPlate.complete && ['completed', 'failed', 'interrupted'].includes(event.status)) {
       showPlate({ completed: '任务完成', failed: '任务失败', interrupted: '任务中止' }[event.status]);
     }
+  }
+
+  function inspectSocketPayload(value) {
+    if (typeof value !== 'string' || value.length > 64 * 1024) return;
+    try { handleNotification(JSON.parse(value)); } catch { /* Non-JSON frames are not Codex turn events. */ }
+  }
+
+  function installEventAdapters() {
+    const eventNames = ['codex:notification', 'codex-notification', 'codex.notification'];
+    for (const name of eventNames) window.addEventListener(name, (event) => handleNotification(event.detail));
+
+    const Socket = globalThis.WebSocket;
+    const prototype = Socket?.prototype;
+    if (!prototype || prototype.__codexEndfieldObserved) return;
+    const addEventListener = prototype.addEventListener;
+    if (typeof addEventListener !== 'function') return;
+    const observed = new WeakSet();
+    const attach = (socket) => {
+      if (observed.has(socket)) return;
+      observed.add(socket);
+      addEventListener.call(socket, 'message', (event) => inspectSocketPayload(event.data));
+    };
+    try {
+      prototype.addEventListener = function patchedAddEventListener(type, listener, options) {
+        if (type === 'message') attach(this);
+        return addEventListener.call(this, type, listener, options);
+      };
+      const onMessage = Object.getOwnPropertyDescriptor(prototype, 'onmessage');
+      if (onMessage?.set && onMessage.configurable) {
+        Object.defineProperty(prototype, 'onmessage', {
+          configurable: onMessage.configurable,
+          enumerable: onMessage.enumerable,
+          get: onMessage.get,
+          set(value) { attach(this); onMessage.set.call(this, value); },
+        });
+      }
+      Object.defineProperty(prototype, '__codexEndfieldObserved', { configurable: false, value: true });
+    } catch { /* A hardened WebSocket prototype is a supported no-op fallback. */ }
   }
 
   function sendConfig() {
@@ -267,6 +310,9 @@
   function updatePanel() {
     const shadow = state.panel?.shadowRoot;
     if (!shadow) return;
+    state.panel.style.setProperty('--ef-accent', palette().accent);
+    state.panel.style.setProperty('--ef-background', palette().background);
+    state.panel.style.setProperty('--ef-foreground', palette().foreground);
     shadow.querySelector('[data-field="palette"]').value = state.config.palette;
     shadow.querySelector('[data-field="corner"]').value = state.config.corner;
     shadow.querySelector('[data-field="contour"]').checked = state.config.contour.enabled;
@@ -293,21 +339,21 @@
     const shadow = state.panel.attachShadow({ mode: 'open' });
     shadow.innerHTML = `
       <style>
-        :host { all: initial; font-family: Arial, sans-serif; color: #f5f5f0; }
+        :host { all: initial; --ef-accent: #fff500; --ef-background: #101110; --ef-foreground: #f5f5f0; font-family: Arial, sans-serif; color: var(--ef-foreground); }
         button, select, input { font: inherit; }
-        #tab { position: fixed; right: 0; top: 48%; z-index: 2147482990; border: 1px solid #fff500; border-right: 0; background: #101110; color: #fff500; padding: 8px 6px; letter-spacing: .12em; cursor: pointer; writing-mode: vertical-rl; }
-        #panel { position: fixed; right: 20px; top: 20px; z-index: 2147482991; width: min(340px, calc(100vw - 40px)); background: #151815; border: 1px solid #5c6459; box-shadow: 8px 8px 0 #000; padding: 18px; display: none; }
+        #tab { position: fixed; right: 0; top: 48%; z-index: 2147482990; border: 1px solid var(--ef-accent); border-right: 0; background: var(--ef-foreground); color: var(--ef-background); padding: 8px 6px; letter-spacing: .12em; cursor: pointer; writing-mode: vertical-rl; }
+        #panel { position: fixed; right: 20px; top: 20px; z-index: 2147482991; width: min(340px, calc(100vw - 40px)); background: var(--ef-background); border: 1px solid #5c6459; box-shadow: 8px 8px 0 #000; padding: 18px; display: none; }
         #panel.open { display: block; }
-        h2 { font-size: 16px; letter-spacing: .12em; margin: 0 0 14px; color: #fff500; }
+        h2 { font-size: 16px; letter-spacing: .12em; margin: 0 0 14px; color: var(--ef-accent); }
         p { font-size: 12px; color: #bac0b4; margin: 0 0 14px; }
         label { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-top: 1px solid #303630; padding: 10px 0; font-size: 13px; }
         select { background: #202520; color: #f5f5f0; border: 1px solid #687364; padding: 4px 6px; }
-        input { accent-color: #fff500; }
-        #close { margin-top: 14px; border: 1px solid #687364; background: transparent; color: #f5f5f0; padding: 7px 12px; cursor: pointer; }
-        #close:focus-visible, #tab:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid #fff500; outline-offset: 2px; }
-        @media (prefers-color-scheme: light) { #panel { background: #f2f2ed; color: #101110; } p { color: #4d514b; } select { background: #fff; color: #101110; } #close { color: #101110; } }
+        input { accent-color: var(--ef-accent); }
+        #close { margin-top: 14px; border: 1px solid #687364; background: transparent; color: var(--ef-foreground); padding: 7px 12px; cursor: pointer; }
+        #close:focus-visible, #tab:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--ef-accent); outline-offset: 2px; }
+        @media (prefers-color-scheme: light) { #panel { background: var(--ef-background); color: var(--ef-foreground); } p { color: color-mix(in srgb, var(--ef-foreground) 72%, transparent); } select { background: color-mix(in srgb, var(--ef-background) 82%, white); color: var(--ef-foreground); } #close { color: var(--ef-foreground); } }
       </style>
-      <button id="tab" type="button" aria-label="打开 Endfield 主题设置">EF</button>
+      <button id="tab" type="button" aria-label="打开 Endfield 主题设置" aria-expanded="false" aria-controls="panel">EF</button>
       <section id="panel" role="dialog" aria-modal="false" aria-labelledby="title">
         <h2 id="title">ENDFIELD / THEME CONTROL</h2>
         <p>增强层设置保存在本机，不会修改 Codex 配置文件。</p>
@@ -324,7 +370,12 @@
     document.body.append(state.panel);
     const tab = shadow.querySelector('#tab');
     const panel = shadow.querySelector('#panel');
-    const toggle = () => { panel.classList.toggle('open'); if (panel.classList.contains('open')) shadow.querySelector('[data-field="palette"]').focus(); };
+    const toggle = () => {
+      const open = !panel.classList.contains('open');
+      panel.classList.toggle('open', open);
+      tab.setAttribute('aria-expanded', String(open));
+      if (open) shadow.querySelector('[data-field="palette"]').focus(); else tab.focus();
+    };
     tab.addEventListener('click', toggle);
     shadow.querySelector('#close').addEventListener('click', toggle);
     shadow.addEventListener('keydown', (event) => { if (event.key === 'Escape' && panel.classList.contains('open')) toggle(); });
@@ -343,9 +394,13 @@
   function restartContour() {
     if (state.contourTimer) cancelAnimationFrame(state.contourTimer);
     state.contourTimer = 0;
-    if (!state.config.enabled || !state.config.contour.enabled || !state.canvas) return;
+    if (!state.canvas) return;
+    state.canvas.style.display = state.config.enabled && state.config.contour.enabled ? 'block' : 'none';
+    if (!state.config.enabled || !state.config.contour.enabled) return;
     drawContour(0);
-    if (state.config.contour.animated && !isReducedMotion()) state.contourTimer = requestAnimationFrame(contourFrame);
+    if (state.config.contour.animated && !isReducedMotion() && !state.scrolling && document.visibilityState !== 'hidden') {
+      state.contourTimer = requestAnimationFrame(contourFrame);
+    }
   }
 
   function drawContour(time) {
@@ -402,8 +457,8 @@
   }
 
   function contourFrame(time) {
-    if (!state.config.contour.enabled || state.scrolling || document.visibilityState === 'hidden') {
-      state.contourTimer = requestAnimationFrame(contourFrame);
+    if (!state.config.enabled || !state.config.contour.enabled || !state.config.contour.animated || isReducedMotion() || state.scrolling || document.visibilityState === 'hidden') {
+      state.contourTimer = 0;
       return;
     }
     const interval = 1000 / state.config.contour.fps;
@@ -481,8 +536,15 @@
     window.addEventListener('message', (event) => handleNotification(event.data));
     const observer = new MutationObserver(() => { const dark = detectDark(); if (dark !== state.dark) { applyTokens(); drawContour(0); } });
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'data-color-mode'] });
+    installEventAdapters();
     window.addEventListener('resize', () => drawContour(0), { passive: true });
-    window.addEventListener('scroll', () => { state.scrolling = true; clearTimeout(state.scrollTimer); state.scrollTimer = setTimeout(() => { state.scrolling = false; }, 180); }, { passive: true, capture: true });
+    window.addEventListener('scroll', () => {
+      state.scrolling = true;
+      if (state.contourTimer) { cancelAnimationFrame(state.contourTimer); state.contourTimer = 0; }
+      clearTimeout(state.scrollTimer);
+      state.scrollTimer = setTimeout(() => { state.scrolling = false; restartContour(); }, 180);
+    }, { passive: true, capture: true });
+    document.addEventListener('visibilitychange', restartContour, { passive: true });
     globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').addEventListener?.('change', restartContour);
     showLoader();
   }

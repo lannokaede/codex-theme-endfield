@@ -13,10 +13,14 @@ if (-not (Test-Path -LiteralPath $ownerPath) -or (Get-Content -Raw -LiteralPath 
   }
   throw "Enhanced mode is not installed. Run npm run enhanced:install first."
 }
+$installItem = Get-Item -LiteralPath $installRoot -Force
+if (($installItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+  throw "Refusing to launch from a reparse-point directory: $installRoot"
+}
 
 $existing = @(Get-Process -Name ChatGPT -ErrorAction SilentlyContinue)
 if ($existing.Count -gt 0) {
-  Write-Error 'Codex is already running. Close every Codex window, then launch Codex Endfield again.'
+  [Console]::Error.WriteLine('Codex is already running. Close every Codex window, then launch Codex Endfield again.')
   exit 2
 }
 

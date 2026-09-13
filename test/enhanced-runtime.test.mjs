@@ -5,7 +5,7 @@ import fs from 'node:fs/promises';
 const runtime = await fs.readFile(new URL('../runtime/enhanced-runtime.js', import.meta.url), 'utf8');
 
 test('enhanced runtime exposes the expected safe visual surfaces', () => {
-  for (const marker of ['codex-endfield-style', 'codex-endfield-canvas', 'codex-endfield-watermark', 'codexEndfieldSave', 'turn/completed', 'prefers-reduced-motion']) {
+  for (const marker of ['codex-endfield-style', 'codex-endfield-canvas', 'codex-endfield-watermark', 'codexEndfieldSave', 'turn/completed', 'codex:notification', 'WebSocket', 'prefers-reduced-motion']) {
     assert.match(runtime, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
   assert.doesNotMatch(runtime, /localStorage/);

@@ -26,7 +26,8 @@ export function isCodexTarget(target) {
   if (!target || typeof target.webSocketDebuggerUrl !== 'string' || typeof target.url !== 'string') return false;
   try {
     const url = new URL(target.url);
-    return url.protocol === 'app:' || url.protocol === 'file:' || url.hostname === LOOPBACK_HOST;
+    if (url.protocol === 'app:' || url.protocol === 'file:') return true;
+    return url.hostname === LOOPBACK_HOST && (/codex/i.test(target.title ?? '') || /codex/i.test(url.pathname));
   } catch {
     return false;
   }
@@ -37,16 +38,19 @@ export class CdpPageSession {
   #nextId = 1;
   #pending = new Map();
   #onBinding;
+  #onClosed;
 
-  constructor(target, { onBinding } = {}) {
+  constructor(target, { onBinding, onClosed } = {}) {
     if (!isCodexTarget(target)) throw new Error('Refusing to attach to a non-Codex target');
     this.target = target;
     this.#onBinding = onBinding;
+    this.#onClosed = onClosed;
   }
 
   async connect() {
     this.#socket = new WebSocket(this.target.webSocketDebuggerUrl, { origin: 'http://127.0.0.1' });
     this.#socket.on('message', (data) => this.#handleMessage(data));
+    this.#socket.once('close', () => this.#onClosed?.());
     await new Promise((resolve, reject) => {
       const onOpen = () => {
         cleanup();

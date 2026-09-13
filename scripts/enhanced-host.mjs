@@ -75,9 +75,12 @@ async function synchronizeTargets() {
     }
   }
 
-  for (const target of targets) {
+  for (const target of targets.slice(0, 8)) {
     if (sessions.has(target.id)) continue;
-    const session = new CdpPageSession(target, { onBinding: saveConfig });
+    const session = new CdpPageSession(target, {
+      onBinding: saveConfig,
+      onClosed: () => sessions.delete(target.id),
+    });
     try {
       await session.connect();
       await session.inject(runtimeSource);
