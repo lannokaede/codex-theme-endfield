@@ -33,5 +33,8 @@ function Remove-OwnedShortcut($shortcutPath) {
 }
 Remove-OwnedShortcut (Join-Path $shortcutRoot 'ChatGPT Endfield.lnk')
 Remove-OwnedShortcut (Join-Path $shortcutRoot 'Codex Endfield.lnk')
+$desktopRoot = [Environment]::GetFolderPath('Desktop')
+Remove-OwnedShortcut (Join-Path $desktopRoot 'ChatGPT Endfield.lnk')
+Remove-OwnedShortcut (Join-Path $desktopRoot 'Codex Endfield.lnk')
 Remove-Item -LiteralPath $installRoot -Recurse -Force
 Write-Host 'ChatGPT Endfield enhancement removed. ChatGPT itself and ~/.codex/config.toml were not changed.'

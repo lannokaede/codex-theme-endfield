@@ -78,16 +78,28 @@ function Test-OwnedShortcut($shortcutPath) {
   }
 }
 
+function Write-OwnedShortcut($shortcutPath) {
+  if ((Test-Path -LiteralPath $shortcutPath) -and -not (Test-OwnedShortcut $shortcutPath)) {
+    throw "Refusing to overwrite an unowned shortcut: $shortcutPath"
+  }
+  $shortcut = $shell.CreateShortcut($shortcutPath)
+  $shortcut.TargetPath = $powershellPath
+  $shortcut.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$launchPath`""
+  $shortcut.WorkingDirectory = $installRoot
+  $shortcut.Description = 'Launch ChatGPT with the Endfield interactive enhancement layer'
+  $shortcut.Save()
+}
+
 $legacyShortcutPath = Join-Path $shortcutRoot 'Codex Endfield.lnk'
 if (Test-OwnedShortcut $legacyShortcutPath) { Remove-Item -LiteralPath $legacyShortcutPath -Force }
 
 $shortcutPath = Join-Path $shortcutRoot 'ChatGPT Endfield.lnk'
-$shortcut = $shell.CreateShortcut($shortcutPath)
-$shortcut.TargetPath = $powershellPath
-$shortcut.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$(Join-Path $installRoot 'enhanced-launch.ps1')`""
-$shortcut.WorkingDirectory = $installRoot
-$shortcut.Description = 'Launch ChatGPT with the Endfield interactive enhancement layer'
-$shortcut.Save()
+Write-OwnedShortcut $shortcutPath
+
+$desktopRoot = [Environment]::GetFolderPath('Desktop')
+$desktopShortcutPath = Join-Path $desktopRoot 'ChatGPT Endfield.lnk'
+Write-OwnedShortcut $desktopShortcutPath
 
 Write-Host "Installed ChatGPT Endfield enhancement to $installRoot"
 Write-Host "Start Menu shortcut: $shortcutPath"
+Write-Host "Desktop shortcut: $desktopShortcutPath"

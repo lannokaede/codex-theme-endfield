@@ -19,8 +19,10 @@ test('PowerShell entry points keep install ownership checks and repo delegation'
   assert.match(uninstall, /ReparsePoint/);
   assert.match(uninstall, /Recurse/);
   assert.match(install, /ChatGPT Endfield\.lnk/);
+  assert.match(install, /GetFolderPath\('Desktop'\)/);
   assert.match(launch, /ChatGPT is already running/);
   assert.match(uninstall, /Codex Endfield\.lnk/);
   assert.match(uninstall, /ChatGPT Endfield\.lnk/);
+  assert.match(uninstall, /GetFolderPath\('Desktop'\)/);
   assert.match(doctor, /ChatGPT/);
 });
