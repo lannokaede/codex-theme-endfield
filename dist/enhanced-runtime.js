@@ -116,6 +116,7 @@
     state.dark = detectDark();
     document.documentElement.dataset.codexEndfield = state.config.enabled ? state.config.palette : 'off';
     document.documentElement.dataset.codexEndfieldMode = state.dark ? 'dark' : 'light';
+    document.documentElement.dataset.codexEndfieldInteractions = state.config.interactions ? 'on' : 'off';
     if (!state.config.enabled) {
       clearProperties();
       return;
@@ -155,9 +156,9 @@
       html[data-codex-endfield] #codex-endfield-watermark { z-index: 0; display: grid; place-items: center; overflow: hidden; }
       html[data-codex-endfield] #codex-endfield-watermark span { color: var(--codex-base-accent); font: 700 clamp(5rem, 18vw, 17rem)/.8 Arial, sans-serif; letter-spacing: .08em; opacity: ${state.dark ? '.085' : '.13'}; transform: rotate(-12deg); user-select: none; white-space: nowrap; }
       html[data-codex-endfield="off"] #codex-endfield-canvas, html[data-codex-endfield="off"] #codex-endfield-watermark { display: none; }
-      html[data-codex-endfield] button:not(:disabled), html[data-codex-endfield] [role="button"]:not([aria-disabled="true"]), html[data-codex-endfield] [role="menuitem"], html[data-codex-endfield] [role="option"] { transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease !important; }
-      html[data-codex-endfield] button:not(:disabled):hover, html[data-codex-endfield] [role="button"]:not([aria-disabled="true"]):hover, html[data-codex-endfield] [role="menuitem"]:hover, html[data-codex-endfield] [role="option"]:hover { border-color: var(--codex-base-accent) !important; box-shadow: inset 3px 0 0 var(--codex-base-accent) !important; transform: translateX(2px); }
-      html[data-codex-endfield] button:not(:disabled):active, html[data-codex-endfield] [role="button"]:not([aria-disabled="true"]):active { transform: translate(1px, 1px) !important; }
+      html[data-codex-endfield-interactions="on"] button:not(:disabled), html[data-codex-endfield-interactions="on"] [role="button"]:not([aria-disabled="true"]), html[data-codex-endfield-interactions="on"] [role="menuitem"], html[data-codex-endfield-interactions="on"] [role="option"] { transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease !important; }
+      html[data-codex-endfield-interactions="on"] button:not(:disabled):hover, html[data-codex-endfield-interactions="on"] [role="button"]:not([aria-disabled="true"]):hover, html[data-codex-endfield-interactions="on"] [role="menuitem"]:hover, html[data-codex-endfield-interactions="on"] [role="option"]:hover { border-color: var(--codex-base-accent) !important; box-shadow: inset 3px 0 0 var(--codex-base-accent) !important; transform: translateX(2px); }
+      html[data-codex-endfield-interactions="on"] button:not(:disabled):active, html[data-codex-endfield-interactions="on"] [role="button"]:not([aria-disabled="true"]):active { transform: translate(1px, 1px) !important; }
       html[data-codex-endfield] :focus-visible { outline: 2px solid var(--codex-base-accent) !important; outline-offset: 2px !important; }
       html[data-codex-endfield] ::selection { background: var(--color-background-text-selection) !important; }
       html[data-codex-endfield] *::-webkit-scrollbar { width: 9px; height: 9px; }
@@ -249,7 +250,9 @@
       return;
     }
     if (previous?.terminal) return;
+    const firstReadableEvent = state.detector.size === 0;
     state.detector.set(event.turnId, { started: previous?.started ?? false, terminal: true });
+    if (firstReadableEvent) return;
     if (state.config.taskPlate.complete && ['completed', 'failed', 'interrupted'].includes(event.status)) {
       showPlate({ completed: '任务完成', failed: '任务失败', interrupted: '任务中止' }[event.status]);
     }
