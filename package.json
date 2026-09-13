@@ -2,14 +2,21 @@
   "name": "codex-theme-endfield",
   "version": "1.0.0",
   "private": true,
-  "description": "Official-interface Endfield-inspired theme presets for the Codex desktop client.",
+  "description": "Endfield-inspired Codex theme presets and an optional Windows interactive enhancement layer.",
   "type": "module",
   "engines": {
     "node": ">=20"
   },
+  "dependencies": {
+    "ws": "8.21.3"
+  },
   "scripts": {
     "build": "node scripts/build.mjs",
     "check": "node --test && node scripts/build.mjs --check",
-    "test": "node --test"
+    "test": "node --test",
+    "enhanced:doctor": "node scripts/enhanced-doctor.mjs",
+    "enhanced:install": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/enhanced-install.ps1",
+    "enhanced:launch": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/enhanced-launch.ps1",
+    "enhanced:uninstall": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/enhanced-uninstall.ps1"
   }
 }
