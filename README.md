@@ -56,7 +56,7 @@ npm run direct:apply -- --apply
 npm run direct:restore
 ```
 
-补丁前会把原始 ASAR 保存到 `%LOCALAPPDATA%\\codex-theme-endfield\\direct-backups\\<版本>\\app.asar.original`，并记录 SHA-256。客户端更新、路径变化、哈希不匹配或安装目录不可写时，工具会拒绝操作；不会强行接管正在运行的 ChatGPT。MSIX 的签名/权限可能导致直接写入失败，这时继续使用上面的增强启动器即可。直接补丁不需要常驻 PowerShell，但属于非官方兼容层，升级后通常需要重新适配。
+补丁前会把原始 ASAR 保存到 `%LOCALAPPDATA%\codex-theme-endfield\direct-backups\<版本>\app.asar.original`，并记录 SHA-256。客户端更新、路径变化、哈希不匹配或安装目录不可写时，工具会拒绝操作；不会强行接管正在运行的 ChatGPT。改写 ASAR 会使该文件与 MSIX 原始签名/区块清单不再一致，Windows 更新或完整性修复可能覆盖它；MSIX 的签名/权限也可能导致直接写入失败，这时继续使用上面的增强启动器即可。直接补丁不需要常驻 PowerShell，但属于非官方兼容层，升级后通常需要重新适配。
 
 ## 卸载与恢复
 
