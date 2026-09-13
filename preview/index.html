@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Codex Endfield theme preset preview" />
+    <title>Codex · Endfield theme preview</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body data-theme="valley-yellow-light">
+    <header class="topbar">
+      <a class="wordmark" href="#top" aria-label="Endfield theme preview home">CODEX <span>/</span> ENDFIELD</a>
+      <p class="topbar-note">OFFICIAL THEME INTERFACE PRESET</p>
+    </header>
+
+    <main id="top" class="page-shell">
+      <section class="intro" aria-labelledby="page-title">
+        <p class="eyebrow">PAPER / SIGNAL / INDUSTRY</p>
+        <h1 id="page-title">让工作区像一张<br /><span>可读的工业图纸</span></h1>
+        <p class="lede">Endfield-inspired palettes for the Codex desktop client. Flat surfaces, high-signal accents, and no game assets.</p>
+        <div class="swatches" aria-label="当前预设颜色">
+          <span class="swatch" data-swatch="surface" title="Surface"></span>
+          <span class="swatch" data-swatch="ink" title="Ink"></span>
+          <span class="swatch" data-swatch="accent" title="Accent"></span>
+          <span class="swatch" data-swatch="skill" title="Skill"></span>
+        </div>
+      </section>
+
+      <aside class="control-panel" aria-labelledby="preset-title">
+        <div class="panel-kicker">THEME PRESETS</div>
+        <h2 id="preset-title">选择配色</h2>
+        <div class="preset-list" role="group" aria-label="选择一个主题预设">
+          <button type="button" data-theme-button="valley-yellow-light" aria-pressed="true">
+            <span class="button-swatch valley-yellow"></span>
+            <span><strong>Valley Yellow</strong><small>Light</small></span>
+          </button>
+          <button type="button" data-theme-button="valley-yellow-dark" aria-pressed="false">
+            <span class="button-swatch valley-yellow"></span>
+            <span><strong>Valley Yellow</strong><small>Dark</small></span>
+          </button>
+          <button type="button" data-theme-button="wuling-cyan-light" aria-pressed="false">
+            <span class="button-swatch wuling-cyan"></span>
+            <span><strong>Wuling Cyan</strong><small>Light</small></span>
+          </button>
+          <button type="button" data-theme-button="wuling-cyan-dark" aria-pressed="false">
+            <span class="button-swatch wuling-cyan"></span>
+            <span><strong>Wuling Cyan</strong><small>Dark</small></span>
+          </button>
+        </div>
+        <p id="theme-status" class="status" role="status" aria-live="polite">Valley Yellow · Light</p>
+        <a class="import-link" href="../dist/valley-yellow-light.txt">复制当前导入字符串 →</a>
+      </aside>
+
+      <section class="workspace" aria-labelledby="workspace-title">
+        <div class="workspace-sidebar">
+          <p class="sidebar-label">WORKSPACE</p>
+          <div class="sidebar-active"><span class="signal-dot"></span>Active thread</div>
+          <div class="sidebar-item">Theme notes</div>
+          <div class="sidebar-item">Release checklist</div>
+          <div class="sidebar-rule"></div>
+          <p class="sidebar-label">RECENT</p>
+          <div class="sidebar-item">Color contrast audit</div>
+          <div class="sidebar-item">Codex import format</div>
+        </div>
+        <div class="thread-pane">
+          <div class="thread-head">
+            <div>
+              <p class="eyebrow">ACTIVE THREAD</p>
+              <h2 id="workspace-title">Industrial paper, readable signal.</h2>
+            </div>
+            <span class="mode-chip" data-mode-chip>LIGHT / 45</span>
+          </div>
+          <p class="thread-copy">A restrained Endfield-inspired palette for daily Codex work. The accent marks decisions; the surface stays quiet enough for long sessions.</p>
+          <div class="code-card" aria-label="主题配置示例">
+            <div class="code-line"><span class="line-number">01</span><span class="code-key">theme</span><span class="code-punct">:</span> <span class="code-value">"codex-theme-v1"</span></div>
+            <div class="code-line"><span class="line-number">02</span><span class="code-key">accentSource</span><span class="code-punct">:</span> <span class="code-value">"custom"</span></div>
+            <div class="code-line"><span class="line-number">03</span><span class="code-key">fonts</span><span class="code-punct">:</span> <span class="code-value">Arial / system code</span></div>
+            <div class="code-line"><span class="line-number">04</span><span class="code-key">windows</span><span class="code-punct">:</span> <span class="code-value">opaque</span></div>
+          </div>
+          <div class="status-row" aria-label="状态颜色示例">
+            <div><span class="status-mark added">+</span><span><strong>Added / verified</strong><small>contrast-safe success signal</small></span></div>
+            <div><span class="status-mark removed">−</span><span><strong>Removed / reviewed</strong><small>contrast-safe danger signal</small></span></div>
+            <div><span class="status-mark skill">✦</span><span><strong>Skill: palette</strong><small data-skill-label>Valley Yellow</small></span></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">codex-theme-v1: <span aria-hidden="true">•</span> no app patching <span aria-hidden="true">•</span> unofficial fan project</footer>
+
+    <script src="./themes.js"></script>
+    <script>
+      const body = document.body;
+      const buttons = [...document.querySelectorAll('[data-theme-button]')];
+      const status = document.querySelector('#theme-status');
+      const importLink = document.querySelector('.import-link');
+      const modeChip = document.querySelector('[data-mode-chip]');
+      const skillLabel = document.querySelector('[data-skill-label]');
+      const swatches = [...document.querySelectorAll('[data-swatch]')];
+
+      function applyTheme(id) {
+        const theme = window.ENDFIELD_THEMES[id];
+        if (!theme) return;
+        body.dataset.theme = id;
+        body.style.setProperty('--surface', theme.surface);
+        body.style.setProperty('--ink', theme.ink);
+        body.style.setProperty('--accent', theme.accent);
+        body.style.setProperty('--skill', theme.skill);
+        body.style.setProperty('--diff-added', theme.diffAdded);
+        body.style.setProperty('--diff-removed', theme.diffRemoved);
+        buttons.forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.themeButton === id)));
+        status.textContent = `${theme.name} · ${theme.variant === 'light' ? 'Light' : 'Dark'}`;
+        modeChip.textContent = `${theme.variant.toUpperCase()} / ${theme.contrast}`;
+        skillLabel.textContent = `${theme.name} skill color`;
+        importLink.href = `../dist/${id}.txt`;
+      }
+
+      buttons.forEach((button) => button.addEventListener('click', () => applyTheme(button.dataset.themeButton)));
+      applyTheme('valley-yellow-light');
+    </script>
+  </body>
+</html>

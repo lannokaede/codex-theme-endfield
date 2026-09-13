@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="800" viewBox="0 0 1280 800" role="img" aria-labelledby="title desc">
+  <title id="title">Endfield Codex theme preview — Valley Yellow / Dark</title>
+  <desc id="desc">Abstract paper-and-industrial Codex preview using the Valley Yellow palette.</desc>
+  <rect width="1280" height="800" fill="#101110"/>
+  <path d="M0 108H1280" stroke="#fff500" stroke-width="8"/>
+  <path d="M0 116H1280" stroke="#f5f5f0" stroke-width="1" opacity=".22"/>
+  <g fill="none" stroke="#f5f5f0" opacity=".13">
+    <path d="M920 0L1280 360M1010 0L1280 270M1100 0L1280 180"/>
+    <path d="M928 0V800M1012 0V800M1096 0V800"/>
+  </g>
+  <rect x="48" y="42" width="1184" height="698" rx="4" fill="#181a18" stroke="#3b3f3a"/>
+  <rect x="48" y="42" width="254" height="698" fill="#f5f5f0" opacity=".96"/>
+  <text x="76" y="92" fill="#fff500" font-family="Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="3">CODEX / ENDFIELD</text>
+  <text x="76" y="132" fill="#101110" font-family="Arial, sans-serif" font-size="28" font-weight="700">Theme presets</text>
+  <text x="76" y="176" fill="#b5bbb0" font-family="Arial, sans-serif" font-size="14">Official theme interface preview</text>
+  <rect x="76" y="218" width="198" height="42" fill="#fff500"/>
+  <text x="92" y="245" fill="#f5f5f0" font-family="Arial, sans-serif" font-size="14" font-weight="700">Valley Yellow / Dark</text>
+  <text x="76" y="300" fill="#b5bbb0" font-family="Arial, sans-serif" font-size="12" letter-spacing="1.5">SURFACE</text>
+  <rect x="76" y="316" width="26" height="26" fill="#101110" stroke="#62675f"/>
+  <text x="114" y="335" fill="#d8dad3" font-family="monospace" font-size="13">#101110</text>
+  <text x="76" y="388" fill="#b5bbb0" font-family="Arial, sans-serif" font-size="12" letter-spacing="1.5">ACCENT</text>
+  <rect x="76" y="404" width="26" height="26" fill="#fff500"/>
+  <text x="114" y="423" fill="#d8dad3" font-family="monospace" font-size="13">#fff500</text>
+  <text x="76" y="650" fill="#b5bbb0" font-family="Arial, sans-serif" font-size="12">Arial UI / system code font</text>
+  <g transform="translate(350 86)">
+    <text x="0" y="0" fill="#f5f5f0" font-family="Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="2">WORKSPACE / ACTIVE THREAD</text>
+    <text x="0" y="52" fill="#f5f5f0" font-family="Arial, sans-serif" font-size="31" font-weight="700">Industrial paper, readable signal.</text>
+    <text x="0" y="86" fill="#a8aaa3" font-family="Arial, sans-serif" font-size="16">A restrained Endfield-inspired palette for daily Codex work.</text>
+    <rect x="0" y="124" width="804" height="1" fill="#3b3f3a"/>
+    <line x1="74" y1="154" x2="204" y2="154" stroke="#fff500" stroke-width="3" opacity="0.92"/><line x1="74" y1="183" x2="275" y2="183" stroke="#3b3f3a" stroke-width="1" opacity="0.75"/><line x1="74" y1="212" x2="346" y2="212" stroke="#3b3f3a" stroke-width="1" opacity="0.75"/><line x1="74" y1="241" x2="417" y2="241" stroke="#3b3f3a" stroke-width="1" opacity="0.75"/><line x1="74" y1="270" x2="228" y2="270" stroke="#fff500" stroke-width="3" opacity="0.92"/><line x1="74" y1="299" x2="299" y2="299" stroke="#3b3f3a" stroke-width="1" opacity="0.75"/><line x1="74" y1="328" x2="370" y2="328" stroke="#3b3f3a" stroke-width="1" opacity="0.75"/><line x1="74" y1="357" x2="441" y2="357" stroke="#3b3f3a" stroke-width="1" opacity="0.75"/><line x1="74" y1="386" x2="252" y2="386" stroke="#fff500" stroke-width="3" opacity="0.92"/><line x1="74" y1="415" x2="323" y2="415" stroke="#3b3f3a" stroke-width="1" opacity="0.75"/><line x1="74" y1="444" x2="394" y2="444" stroke="#3b3f3a" stroke-width="1" opacity="0.75"/><line x1="74" y1="473" x2="205" y2="473" stroke="#3b3f3a" stroke-width="1" opacity="0.75"/>
+    <rect x="0" y="516" width="804" height="94" fill="#101110" stroke="#3b3f3a"/>
+    <text x="24" y="548" fill="#a8aaa3" font-family="monospace" font-size="13">status</text>
+    <circle cx="91" cy="543" r="6" fill="#4fbf5c"/>
+    <text x="108" y="548" fill="#f5f5f0" font-family="Arial, sans-serif" font-size="15">Added / verified</text>
+    <circle cx="292" cy="543" r="6" fill="#ff6b61"/>
+    <text x="309" y="548" fill="#f5f5f0" font-family="Arial, sans-serif" font-size="15">Removed / reviewed</text>
+    <text x="24" y="584" fill="#fff500" font-family="Arial, sans-serif" font-size="15" font-weight="700">Skill: Valley Yellow palette</text>
+    <text x="0" y="672" fill="#a8aaa3" font-family="monospace" font-size="12">codex-theme-v1:  •  opaque windows  •  contrast 60</text>
+  </g>
+</svg>

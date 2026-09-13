@@ -1,0 +1,15 @@
+{
+  "name": "codex-theme-endfield",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Official-interface Endfield-inspired theme presets for the Codex desktop client.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node --test && node scripts/build.mjs --check",
+    "test": "node --test"
+  }
+}
