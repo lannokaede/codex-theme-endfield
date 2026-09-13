@@ -33,3 +33,13 @@ test('user-facing copy names the host application ChatGPT', async () => {
   assert.match(preview, /CHATGPT|ChatGPT/);
   assert.match(packageJson, /ChatGPT/);
 });
+
+test('README keeps revision details in NOTICE instead of user-facing copy', async () => {
+  const readme = await readFile(path.join(root, 'README.md'), 'utf8');
+  const notice = await readFile(path.join(root, 'NOTICE.md'), 'utf8');
+  const upstreamRevision = 'e6dd22a70bf78e5ffea5744c749f8e0065384ab7';
+
+  assert.doesNotMatch(readme, /\b[0-9a-f]{40}\b/i);
+  assert.match(readme, /NOTICE\.md/);
+  assert.match(notice, new RegExp(upstreamRevision));
+});

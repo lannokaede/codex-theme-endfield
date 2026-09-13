@@ -71,4 +71,4 @@ An unofficial Windows-only interactive enhancement layer for the ChatGPT desktop
 
 ## 许可与署名
 
-视觉配色、交互方向和部分算法参考 [ymh0000123/dsh-theme-endfield](https://github.com/ymh0000123/dsh-theme-endfield)，并按上游 MIT License 保留署名；适配基准为提交 `e6dd22a70bf78e5ffea5744c749f8e0065384ab7`。详见 [`NOTICE.md`](NOTICE.md) 与 [`LICENSE`](LICENSE)。
+视觉配色、交互方向和部分算法参考 [ymh0000123/dsh-theme-endfield](https://github.com/ymh0000123/dsh-theme-endfield)，并按上游 MIT License 保留署名。精确来源与许可信息见 [`NOTICE.md`](NOTICE.md) 和 [`LICENSE`](LICENSE)。
