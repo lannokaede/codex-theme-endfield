@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Fixed desktop shortcut failures appearing as a momentary PowerShell flash: shortcut launches are now hidden and show a persistent explanation when ChatGPT must be fully closed first.
+
 ## 1.1.0
 
 - Added an optional Windows launcher and loopback-only CDP injection host.

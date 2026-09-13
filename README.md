@@ -26,13 +26,13 @@ npm run enhanced:install
 
 安装器只写入 `%LOCALAPPDATA%\codex-theme-endfield`，并创建开始菜单快捷方式 **ChatGPT Endfield**。它会保留已有配置；如果发现由本项目创建的旧 **Codex Endfield** 快捷方式，会安全迁移到新名称。
 
-首次启动前请完全关闭所有 ChatGPT 进程，然后使用快捷方式或：
+首次启动前请从系统托盘完全退出 ChatGPT，并确认任务管理器中没有 `ChatGPT.exe` 进程，然后使用快捷方式或：
 
 ```powershell
 npm run enhanced:launch
 ```
 
-启动器每次自动解析最新的 `OpenAI.Codex` MSIX 路径。已运行的 ChatGPT 不会被自动结束；启动器会提示关闭后重试。运行期间会有一个只绑定 `127.0.0.1` 的本地调试端口，增强宿主不会把对话正文、Cookie、localStorage 或鉴权数据写入日志或配置。
+启动器每次自动解析最新的 `OpenAI.Codex` MSIX 路径。已运行的 ChatGPT 不会被自动结束；从桌面快捷方式启动时会弹窗说明如何完全退出，不再出现 PowerShell 窗口一闪而过却没有反馈的情况。运行期间会有一个只绑定 `127.0.0.1` 的本地调试端口，增强宿主不会把对话正文、Cookie、localStorage 或鉴权数据写入日志或配置。
 
 设置通过 ChatGPT 右侧的 `EF` 标签或 `Ctrl+Shift+E` 打开，配置保存在 `%LOCALAPPDATA%\codex-theme-endfield\config.json`。
 

@@ -1,4 +1,33 @@
+param([switch]$Shortcut)
+
 $ErrorActionPreference = 'Stop'
+
+function Show-LaunchMessage([string]$Message, [string]$Kind = 'Error') {
+  [Console]::Error.WriteLine($Message)
+  if (-not $Shortcut) { return }
+
+  try {
+    Add-Type -AssemblyName System.Windows.Forms
+    $icon = if ($Kind -eq 'Information') {
+      [System.Windows.Forms.MessageBoxIcon]::Information
+    } else {
+      [System.Windows.Forms.MessageBoxIcon]::Error
+    }
+    [System.Windows.Forms.MessageBox]::Show(
+      $Message,
+      'ChatGPT Endfield',
+      [System.Windows.Forms.MessageBoxButtons]::OK,
+      $icon
+    ) | Out-Null
+  } catch {
+    # The console message remains available for command-line launches.
+  }
+}
+
+trap {
+  Show-LaunchMessage $_.Exception.Message
+  exit 1
+}
 
 $installRoot = [IO.Path]::GetFullPath($PSScriptRoot)
 $ownerPath = Join-Path $installRoot '.owner'
@@ -8,7 +37,9 @@ if (-not (Test-Path -LiteralPath $ownerPath) -or (Get-Content -Raw -LiteralPath 
   $installedLaunch = Join-Path $installedRoot 'enhanced-launch.ps1'
   $installedOwner = Join-Path $installedRoot '.owner'
   if ((Test-Path -LiteralPath $installedLaunch) -and (Test-Path -LiteralPath $installedOwner) -and (Get-Content -Raw -LiteralPath $installedOwner).Trim() -eq 'codex-theme-endfield') {
-    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $installedLaunch
+    $delegateArguments = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $installedLaunch)
+    if ($Shortcut) { $delegateArguments += '-Shortcut' }
+    & powershell.exe @delegateArguments
     exit $LASTEXITCODE
   }
   throw "Enhanced mode is not installed. Run npm run enhanced:install first."
@@ -20,7 +51,7 @@ if (($installItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
 
 $existing = @(Get-Process -Name ChatGPT -ErrorAction SilentlyContinue)
 if ($existing.Count -gt 0) {
-  [Console]::Error.WriteLine('ChatGPT is already running. Close every ChatGPT window, then launch ChatGPT Endfield again.')
+  Show-LaunchMessage 'ChatGPT is already running. Endfield cannot attach to an app that is already open. Fully quit ChatGPT from the system tray, confirm that no ChatGPT.exe process remains, then try this shortcut again.' 'Information'
   exit 2
 }
 

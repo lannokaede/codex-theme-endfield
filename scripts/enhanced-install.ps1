@@ -84,7 +84,7 @@ function Write-OwnedShortcut($shortcutPath) {
   }
   $shortcut = $shell.CreateShortcut($shortcutPath)
   $shortcut.TargetPath = $powershellPath
-  $shortcut.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$launchPath`""
+  $shortcut.Arguments = "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$launchPath`" -Shortcut"
   $shortcut.WorkingDirectory = $installRoot
   $shortcut.Description = 'Launch ChatGPT with the Endfield interactive enhancement layer'
   $shortcut.Save()
