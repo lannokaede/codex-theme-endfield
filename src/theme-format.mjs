@@ -18,6 +18,9 @@ export function validateThemeDefinition(definition) {
     assert(typeof definition[field] === 'string' && definition[field].length > 0, `${field} is required`);
   }
   assert(VARIANTS.has(definition.variant), `variant must be light or dark`);
+  assert(definition.codeThemeId === CODE_THEME_ID, 'codeThemeId must be codex');
+  assert(definition.accentSource === 'custom', 'accentSource must be custom');
+  assert(definition.opaqueWindows === true, 'opaqueWindows must be true');
   for (const field of ['accent', 'surface', 'ink', 'skill', 'diffAdded', 'diffRemoved']) {
     assertColor(definition[field], field);
   }
@@ -35,7 +38,7 @@ export function toThemePayload(definition) {
     codeThemeId: CODE_THEME_ID,
     theme: {
       accent: definition.accent,
-      accentSource: 'custom',
+      accentSource: definition.accentSource,
       contrast: definition.contrast,
       fonts: {
         code: definition.fonts.code,
@@ -43,7 +46,7 @@ export function toThemePayload(definition) {
         ui: definition.fonts.ui,
       },
       ink: definition.ink,
-      opaqueWindows: true,
+      opaqueWindows: definition.opaqueWindows,
       semanticColors: {
         diffAdded: definition.diffAdded,
         diffRemoved: definition.diffRemoved,
