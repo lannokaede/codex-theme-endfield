@@ -22,22 +22,22 @@ let packageInfo = null;
 try {
   packageInfo = powershellJson("$p=Get-AppxPackage -Name OpenAI.Codex | Sort-Object {[version]$_.Version} | Select-Object -Last 1; if ($p) { $p | Select-Object Name,Version,InstallLocation,PackageFullName | ConvertTo-Json -Compress }");
 } catch (error) {
-  failures.push(`Could not query the Codex MSIX package: ${error.message}`);
+  failures.push(`Could not query the ChatGPT MSIX package: ${error.message}`);
 }
 
 if (!packageInfo?.InstallLocation) {
-  failures.push('OpenAI.Codex MSIX package was not found');
+  failures.push('ChatGPT MSIX package was not found');
 } else {
   const executable = path.join(packageInfo.InstallLocation, 'app', 'ChatGPT.exe');
-  if (!fs.existsSync(executable)) failures.push(`Codex executable not found: ${executable}`);
-  else console.log(`✓ Codex ${packageInfo.Version} at ${executable}`);
+  if (!fs.existsSync(executable)) failures.push(`ChatGPT executable not found: ${executable}`);
+  else console.log(`✓ ChatGPT ${packageInfo.Version} at ${executable}`);
 }
 
 try {
   const count = powershellJson("@(Get-Process -Name ChatGPT -ErrorAction SilentlyContinue).Count");
-  if (Number(count) > 0) warnings.push('Codex is currently running; close it before using enhanced:launch');
+  if (Number(count) > 0) warnings.push('ChatGPT is currently running; close it before using enhanced:launch');
 } catch {
-  warnings.push('Could not determine whether Codex is currently running');
+  warnings.push('Could not determine whether ChatGPT is currently running');
 }
 
 const server = net.createServer();

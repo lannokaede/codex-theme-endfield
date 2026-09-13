@@ -20,14 +20,14 @@ if (($installItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
 
 $existing = @(Get-Process -Name ChatGPT -ErrorAction SilentlyContinue)
 if ($existing.Count -gt 0) {
-  [Console]::Error.WriteLine('Codex is already running. Close every Codex window, then launch Codex Endfield again.')
+  [Console]::Error.WriteLine('ChatGPT is already running. Close every ChatGPT window, then launch ChatGPT Endfield again.')
   exit 2
 }
 
 $package = Get-AppxPackage -Name OpenAI.Codex | Sort-Object { [version]$_.Version } | Select-Object -Last 1
 if (-not $package) { throw 'OpenAI.Codex MSIX package was not found.' }
 $codexExe = Join-Path $package.InstallLocation 'app\ChatGPT.exe'
-if (-not (Test-Path -LiteralPath $codexExe)) { throw "Codex executable was not found: $codexExe" }
+if (-not (Test-Path -LiteralPath $codexExe)) { throw "ChatGPT executable was not found: $codexExe" }
 
 $listener = [Net.Sockets.TcpListener]::new([Net.IPAddress]::Parse('127.0.0.1'), 0)
 $listener.Start()
@@ -45,6 +45,6 @@ try {
   if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 } finally {
   if (-not $codex.HasExited) {
-    Write-Host 'Endfield host stopped; Codex remains open without the enhancement layer.'
+    Write-Host 'Endfield host stopped; ChatGPT remains open without the enhancement layer.'
   }
 }

@@ -2,7 +2,7 @@
   "name": "codex-theme-endfield",
   "version": "1.1.0",
   "private": true,
-  "description": "Endfield-inspired Codex theme presets and an optional Windows interactive enhancement layer.",
+  "description": "Endfield-inspired interactive enhancement layer for the ChatGPT desktop client.",
   "type": "module",
   "engines": {
     "node": ">=20"

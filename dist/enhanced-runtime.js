@@ -356,7 +356,7 @@
       <button id="tab" type="button" aria-label="打开 Endfield 主题设置" aria-expanded="false" aria-controls="panel">EF</button>
       <section id="panel" role="dialog" aria-modal="false" aria-labelledby="title">
         <h2 id="title">ENDFIELD / THEME CONTROL</h2>
-        <p>增强层设置保存在本机，不会修改 Codex 配置文件。</p>
+        <p>增强层设置保存在本机，不会修改 ChatGPT 配置文件。</p>
         <label>配色<select data-field="palette"><option value="valley-yellow">Valley Yellow</option><option value="wuling-cyan">Wuling Cyan</option></select></label>
         <label>圆角<select data-field="corner"><option value="square">Square</option><option value="rounded">Rounded</option></select></label>
         <label>等高线<input data-field="contour" type="checkbox"></label>
@@ -477,7 +477,7 @@
     state.loaderShown = true;
     const loader = document.createElement('div');
     loader.id = 'codex-endfield-loader';
-    loader.innerHTML = '<div data-brand>ENDFIELD // CODEX</div><div data-status>INITIALIZING SURFACE</div><div data-rail><i></i></div><strong data-percent>00</strong>';
+    loader.innerHTML = '<div data-brand>ENDFIELD // CHATGPT</div><div data-status>INITIALIZING SURFACE</div><div data-rail><i></i></div><strong data-percent>00</strong>';
     Object.assign(loader.style, {
       position: 'fixed', inset: '0', zIndex: '2147482999', background: '#070907', color: '#f5f5f0',
       display: 'grid', gridTemplateRows: 'auto auto 4px auto', alignContent: 'center', gap: '14px', padding: '12vw',

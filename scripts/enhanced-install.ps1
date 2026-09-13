@@ -63,14 +63,31 @@ if (-not (Test-Path -LiteralPath (Join-Path $installRoot 'config.json'))) {
 if ($LASTEXITCODE -ne 0) { throw 'Installing the enhanced runtime dependency failed.' }
 
 $shortcutRoot = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs'
-$shortcutPath = Join-Path $shortcutRoot 'Codex Endfield.lnk'
+New-Item -ItemType Directory -Path $shortcutRoot -Force | Out-Null
 $shell = New-Object -ComObject WScript.Shell
+$powershellPath = Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
+$launchPath = [IO.Path]::GetFullPath((Join-Path $installRoot 'enhanced-launch.ps1'))
+
+function Test-OwnedShortcut($shortcutPath) {
+  if (-not (Test-Path -LiteralPath $shortcutPath)) { return $false }
+  try {
+    $candidate = $shell.CreateShortcut($shortcutPath)
+    return ([IO.Path]::GetFullPath($candidate.TargetPath) -eq [IO.Path]::GetFullPath($powershellPath) -and [string]$candidate.Arguments -like "*$launchPath*")
+  } catch {
+    return $false
+  }
+}
+
+$legacyShortcutPath = Join-Path $shortcutRoot 'Codex Endfield.lnk'
+if (Test-OwnedShortcut $legacyShortcutPath) { Remove-Item -LiteralPath $legacyShortcutPath -Force }
+
+$shortcutPath = Join-Path $shortcutRoot 'ChatGPT Endfield.lnk'
 $shortcut = $shell.CreateShortcut($shortcutPath)
-$shortcut.TargetPath = (Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe')
+$shortcut.TargetPath = $powershellPath
 $shortcut.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$(Join-Path $installRoot 'enhanced-launch.ps1')`""
 $shortcut.WorkingDirectory = $installRoot
-$shortcut.Description = 'Launch Codex with the Endfield interactive enhancement layer'
+$shortcut.Description = 'Launch ChatGPT with the Endfield interactive enhancement layer'
 $shortcut.Save()
 
-Write-Host "Installed Codex Endfield enhancement to $installRoot"
+Write-Host "Installed ChatGPT Endfield enhancement to $installRoot"
 Write-Host "Start Menu shortcut: $shortcutPath"

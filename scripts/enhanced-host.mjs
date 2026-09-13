@@ -62,7 +62,7 @@ async function synchronizeTargets() {
   } catch (error) {
     if (lastError !== error.message) {
       lastError = error.message;
-      console.warn(`Waiting for Codex CDP: ${error.message}`);
+      console.warn(`Waiting for ChatGPT CDP: ${error.message}`);
     }
     return;
   }
@@ -85,10 +85,10 @@ async function synchronizeTargets() {
       await session.connect();
       await session.inject(runtimeSource);
       sessions.set(target.id, session);
-      console.log(`Endfield enhancement attached to ${target.id}`);
+      console.log(`ChatGPT Endfield enhancement attached to ${target.id}`);
     } catch (error) {
       session.close();
-      console.warn(`Endfield enhancement could not attach: ${error.message}`);
+      console.warn(`ChatGPT Endfield enhancement could not attach: ${error.message}`);
     }
   }
 }
