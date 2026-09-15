@@ -73,12 +73,12 @@ test('runtime renders its interactive surfaces and responds to turn completion e
     await new Promise((resolve) => setTimeout(resolve, 600));
     const surfaces = await session.send('Runtime.evaluate', { expression: `({
       canvas: Boolean(document.querySelector('#codex-endfield-canvas')),
-      watermark: document.querySelector('#codex-endfield-watermark svg text')?.textContent,
+      watermark: document.querySelector('#codex-endfield-watermark svg title')?.textContent,
       panel: Boolean(document.querySelector('#codex-endfield-settings')?.shadowRoot?.querySelector('#tab')),
       loader: Boolean(document.querySelector('#codex-endfield-loader')),
       accent: getComputedStyle(document.documentElement).getPropertyValue('--codex-base-accent').trim(),
     })`, returnByValue: true });
-    assert.deepEqual(surfaces.result.value, { canvas: true, watermark: 'ENDFIELD', panel: true, loader: true, accent: '#14d0d0' });
+    assert.deepEqual(surfaces.result.value, { canvas: true, watermark: 'ENDFIELD INDUSTRIES', panel: true, loader: true, accent: '#14d0d0' });
 
     const plate = await session.send('Runtime.evaluate', { expression: 'document.querySelector("#codex-endfield-task-plate")?.textContent ?? null', returnByValue: true });
     assert.equal(plate.result.value, '任务完成');

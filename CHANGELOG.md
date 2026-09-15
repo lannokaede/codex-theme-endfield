@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Replaced the invented geometric watermark with the ENDFIELD INDUSTRIES vector emblem, preserving theme color and subtle opacity.
+
 - Added an experimental direct preload patch mode (`direct:doctor`, `direct:status`, `direct:apply`, `direct:restore`) with an exact-version gate, SHA-256 backup, atomic replacement and restore safety checks. This mode is continuously maintained as ChatGPT internals change.
 - Reworked the visual layer around DSH's paper/ink design: conversation-scoped geometric watermark, neutral contours, square controls and restrained signal accents.
 - Removed the persistent EF edge tab and prevented theme painting in auxiliary windows; replaced the promotional preview with a chat layout.

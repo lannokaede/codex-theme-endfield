@@ -4,7 +4,7 @@
 
 > 🚧 持续更新中：ChatGPT 客户端会自动更新，直接补丁模式依赖内部文件；每次客户端更新后请先运行 doctor，再决定是否重新应用补丁。
 
-> 非官方同人项目。本项目与 OpenAI、Hypergryph、GRYPHLINE 没有隶属、赞助或授权关系，也不包含官方游戏素材。
+> 非官方同人项目。本项目与 OpenAI、Hypergryph、GRYPHLINE 没有隶属、赞助或授权关系，水印使用 ENDFIELD INDUSTRIES 标志，素材来源及权利说明见 [NOTICE.md](NOTICE.md)。
 
 ## 功能
 
