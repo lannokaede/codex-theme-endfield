@@ -2,7 +2,7 @@
 
 把《明日方舟：终末地》同人主题的纸墨工业视觉语言移植到 ChatGPT 客户端，加入动态等高线、工业交互、水印、启动动画和任务状态大字。
 
-> 🚧 持续更新中：ChatGPT 客户端会自动更新，直接补丁模式依赖内部文件；每次客户端更新后请先运行 doctor，再决定是否重新应用补丁。
+> 🚧 持续更新中：当前可用方式只有增强层。直接注入/持久化方案仍在开发和兼容性验证中，暂不作为安装方式发布。
 
 > 非官方同人项目。本项目与 OpenAI、Hypergryph、GRYPHLINE 没有隶属、赞助或授权关系，水印使用 ENDFIELD INDUSTRIES 标志，素材来源及权利说明见 [NOTICE.md](NOTICE.md)。
 
@@ -16,7 +16,9 @@
 - Shadow DOM 设置面板，可切换 Valley Yellow/Wuling Cyan、动效和任务提示；
 - `prefers-reduced-motion` 支持，减少动态效果时停止循环动画但保留静态提示。
 
-## 安装
+## 安装（增强层）
+
+当前发布版本只有增强层安装方式。它通过启动器向 ChatGPT Electron 渲染进程注入运行时，不改写客户端安装文件。
 
 要求 Windows、Node.js 20+ 和当前用户已安装 ChatGPT 桌面客户端：
 
@@ -40,23 +42,11 @@ npm run enhanced:launch
 
 背景装饰仅挂载到主内容区域，宠物、语音及透明辅助窗口不参与美化。客户端更新后如果无法识别主内容区域，增强层不会给整个窗口铺设背景。
 
-## 第二种方法：直接 preload 补丁（实验性）
+## 直接注入/持久化方案（开发中）
 
-如果希望普通 ChatGPT 快捷方式直接加载美化层，可以选择直接修改当前 MSIX 的 `app\\resources\\app.asar`。补丁只在已验证的 ChatGPT `26.903.9818.0` 上启用，向 `.vite/build/preload.js` 追加本项目运行时；不会修改账号数据、Cookie、localStorage 或 `~/.codex/config.toml`。
+直接修改 `app.asar`、替换 preload 或注册 MSIX 修改包仍在开发和兼容性验证阶段。当前版本不把它作为可用安装路径，也不会把它作为默认启动方式；日常使用请使用上面的增强层快捷方式。
 
-```powershell
-# 只读检查（不会修改文件）
-npm run direct:doctor
-npm run direct:status
-
-# 预览并显式确认后才写入 app.asar；必须先完全退出 ChatGPT
-npm run direct:apply -- --apply
-
-# 用校验过的原始备份恢复
-npm run direct:restore
-```
-
-补丁前会把原始 ASAR 保存到 `%LOCALAPPDATA%\codex-theme-endfield\direct-backups\<版本>\app.asar.original`，并记录 SHA-256。客户端更新、路径变化、哈希不匹配或安装目录不可写时，工具会拒绝操作；不会强行接管正在运行的 ChatGPT。改写 ASAR 会使该文件与 MSIX 原始签名/区块清单不再一致，Windows 更新或完整性修复可能覆盖它；MSIX 的签名/权限也可能导致直接写入失败，这时继续使用上面的增强启动器即可。直接补丁不需要常驻 PowerShell，但属于非官方兼容层，升级后通常需要重新适配。
+相关 `direct:*` 命令和实现仅用于开发测试，请不要在生产客户端上运行 `npm run direct:install`。ChatGPT 更新后，内部 preload、ASAR 结构和 MSIX package graph 都可能变化；未经验证的直接注入可能导致客户端无法启动。待版本探针、回滚流程和真实客户端回归测试完成后，再另行发布可用说明。
 
 ## 卸载与恢复
 
@@ -83,13 +73,13 @@ npm audit --omit=dev
 
 ## 安全与兼容性
 
-增强启动器模式是非官方兼容层，通过 loopback-only Electron CDP 注入 CSS/JS，不修改 `app.asar`、MSIX 安装目录或全局配置，也不需要管理员权限。直接补丁模式则会在显式确认后改写 `app.asar`，始终保留并校验可恢复的原始备份。两种模式都不读取对话正文或鉴权数据。ChatGPT 更新后内部 DOM、事件、preload 或 ASAR 结构可能变化；项目会持续更新版本探针和补丁适配，遇到未知版本时默认拒绝直接修改。
+当前发布模式只有增强层：通过 loopback-only Electron CDP 注入 CSS/JS，不修改 `app.asar`、MSIX 安装目录或全局配置，也不需要管理员权限。直接注入/持久化方案仍在开发中，尚未承诺跨版本兼容。增强层不会读取对话正文或鉴权数据；ChatGPT 更新后内部 DOM、事件或 CDP 行为可能变化，遇到不兼容时请先运行 `npm run enhanced:doctor`。
 
 技术实现仍保留现有仓库、命令和 `OpenAI.Codex` 标识，以兼容 Windows 安装器与旧脚本；用户界面统一使用 ChatGPT 名称。
 
 ## English summary
 
-An unofficial Windows-only interactive enhancement layer for the ChatGPT desktop client, inspired by the Endfield paper-and-industrial visual language. The default launcher injects the runtime through loopback-only Electron CDP; an experimental second mode can append the same runtime to the verified ASAR preload with an explicit `--apply`, a SHA-256 backup, and a restore command. The project is continuously maintained as the client changes. Neither mode reads conversation content or authentication data. Repository and Windows package identifiers retain their technical `Codex` names for compatibility.
+An unofficial Windows-only interactive enhancement layer for the ChatGPT desktop client, inspired by the Endfield paper-and-industrial visual language. The currently available method launches ChatGPT with a loopback-only Electron CDP host and injects the runtime without modifying the installed app. Direct preload/ASAR/MSIX injection is still under development and is not an available installation method yet. Neither mode reads conversation content or authentication data. Repository and Windows package identifiers retain their technical `Codex` names for compatibility.
 
 ## 许可与署名
 
